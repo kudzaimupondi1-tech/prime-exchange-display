@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { loadState, saveState, AppState } from "@/lib/store";
+import { loadState, saveState, fetchVideoUrls, AppState } from "@/lib/store";
 import ExchangeRateCard from "@/components/ExchangeRateCard";
 import VideoPanelNew from "@/components/VideoPanelNew";
 import TickerBar from "@/components/TickerBar";
@@ -8,12 +8,30 @@ import LoginModalNew from "@/components/LoginModalNew";
 import FullscreenHint from "@/components/FullscreenHint";
 
 const Index = () => {
-  const [state, setState] = useState<AppState>(loadState);
+  const [state, setState] = useState<AppState | null>(null);
+  const [playlist, setPlaylist] = useState<string[]>([]);
   const [adminMode, setAdminMode] = useState<"closed" | "login" | "open">("closed");
+
+  useEffect(() => {
+    const init = async () => {
+      const s = await loadState();
+      setState(s);
+      const vp = await fetchVideoUrls();
+      setPlaylist(vp);
+    };
+    init();
+    
+    // Auto-refresh the playlist every hour just in case new videos are dropped into the bucket
+    const iv = setInterval(async () => {
+      const vp = await fetchVideoUrls();
+      if (vp.length > 0) setPlaylist(vp);
+    }, 3600000);
+    return () => clearInterval(iv);
+  }, []);
 
   const handleUpdate = useCallback((newState: AppState) => {
     setState(newState);
-    saveState(newState);
+    saveState(newState).catch(console.error);
   }, []);
 
   // Listen for cancel from login modal
@@ -22,6 +40,14 @@ const Index = () => {
     window.addEventListener("admin-cancel", handler);
     return () => window.removeEventListener("admin-cancel", handler);
   }, []);
+
+  if (!state) {
+    return (
+      <div style={{ width: "100vw", height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", background: "#0a0f1e", color: "#d4af37", fontFamily: "Montserrat, sans-serif", fontSize: "1.5rem" }}>
+        Loading Display...
+      </div>
+    );
+  }
 
   return (
     <div
@@ -60,7 +86,12 @@ const Index = () => {
 
         {/* Right: Video Panel */}
         <div style={{ flex: 1, height: "100%", padding: "0 8px 8px 4px", minWidth: 0, display: "flex", justifyContent: "flex-end" }}>
-          <VideoPanelNew videoUrl={state.videoUrl} companyName={state.companyName} />
+          <VideoPanelNew 
+            companyName={state.companyName} 
+            displayMode={state.displayMode}
+            announcementText={state.announcementText}
+            playlist={playlist}
+          />
         </div>
       </div>
 

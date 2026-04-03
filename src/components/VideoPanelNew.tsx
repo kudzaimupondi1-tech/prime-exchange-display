@@ -1,26 +1,41 @@
 import { useState, useRef, useEffect } from "react";
 
 interface Props {
-  videoUrl?: string; // Kept for backwards compatibility
   companyName: string;
+  displayMode?: "video" | "announcement";
+  announcementText?: string;
+  playlist?: string[];
 }
 
-const PLAYLIST = [
+const DEFAULT_PLAYLIST = [
   "/(1080p).mp4",
+  "/0778722_AFC_Agent_Banking_TVC(1080p).mp4",
+  "/0778723_AFC_DigiPay_TVC(1080p).mp4",
   "/0778728_A_life_well_linked_Internet___Corporate_Banking_TVC(1080p).mp4",
   "/AFC_Savings_Account(1080p).mp4",
   "/A_life_well_linked(1080p).mp4",
   "/Private_Banking(1080p).mp4"
 ];
 
-const VideoPanelNew = ({ companyName }: Props) => {
+const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = "", playlist = [] }: Props) => {
   const [hasError, setHasError] = useState(false);
-  const showVideo = !hasError;
+  const showVideo = !hasError && displayMode === "video";
+  const activePlaylist = playlist.length > 0 ? playlist : DEFAULT_PLAYLIST;
 
   const [activePlayer, setActivePlayer] = useState<0 | 1>(0);
-  const [src0, setSrc0] = useState(PLAYLIST[0]);
-  const [src1, setSrc1] = useState(PLAYLIST[1 % PLAYLIST.length]);
+  const [src0, setSrc0] = useState(activePlaylist[0]);
+  const [src1, setSrc1] = useState(activePlaylist[1 % activePlaylist.length]);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // When playlist finishes loading from Supabase, update the stagnant initial sources
+  useEffect(() => {
+    if (playlist.length > 0) {
+      setSrc0(playlist[0]);
+      setSrc1(playlist[1 % playlist.length]);
+      setCurrentIndex(0);
+      setActivePlayer(0);
+    }
+  }, [playlist]);
 
   const videoRef0 = useRef<HTMLVideoElement>(null);
   const videoRef1 = useRef<HTMLVideoElement>(null);
@@ -43,7 +58,7 @@ const VideoPanelNew = ({ companyName }: Props) => {
         }
       }
     }
-  }, [showVideo]);
+  }, [showVideo, activePlayer]);
 
   const forcePlay = () => {
     const activeRef = activePlayer === 0 ? videoRef0 : videoRef1;
@@ -55,8 +70,8 @@ const VideoPanelNew = ({ companyName }: Props) => {
   };
 
   const handleVideoEnded = () => {
-    const nextIndex = (currentIndex + 1) % PLAYLIST.length;
-    const preloadIndex = (nextIndex + 1) % PLAYLIST.length;
+    const nextIndex = (currentIndex + 1) % activePlaylist.length;
+    const preloadIndex = (nextIndex + 1) % activePlaylist.length;
     
     if (activePlayer === 0) {
       // Player 0 ended. Activate player 1.
@@ -67,8 +82,9 @@ const VideoPanelNew = ({ companyName }: Props) => {
         videoRef1.current.currentTime = 0;
         videoRef1.current.play().catch(e => console.error("Play error:", e));
       }
-      // Prepare player 0 for the next round
-      setSrc0(PLAYLIST[preloadIndex]);
+      setTimeout(() => {
+        setSrc0(activePlaylist[preloadIndex]);
+      }, 500);
     } else {
       // Player 1 ended. Activate player 0.
       setActivePlayer(0);
@@ -78,8 +94,9 @@ const VideoPanelNew = ({ companyName }: Props) => {
         videoRef0.current.currentTime = 0;
         videoRef0.current.play().catch(e => console.error("Play error:", e));
       }
-      // Prepare player 1 for the next round
-      setSrc1(PLAYLIST[preloadIndex]);
+      setTimeout(() => {
+        setSrc1(activePlaylist[preloadIndex]);
+      }, 500);
     }
     setCurrentIndex(nextIndex);
   };
@@ -99,6 +116,7 @@ const VideoPanelNew = ({ companyName }: Props) => {
             zIndex: activePlayer === 0 ? 10 : 1
           }}
           playsInline
+          preload="auto"
           onEnded={activePlayer === 0 ? handleVideoEnded : undefined}
           onError={(e) => {
             if (activePlayer === 0) {
@@ -120,6 +138,7 @@ const VideoPanelNew = ({ companyName }: Props) => {
             zIndex: activePlayer === 1 ? 10 : 1
           }}
           playsInline
+          preload="auto"
           onEnded={activePlayer === 1 ? handleVideoEnded : undefined}
           onError={(e) => {
             if (activePlayer === 1) {
@@ -152,6 +171,33 @@ const VideoPanelNew = ({ companyName }: Props) => {
             <p style={{ fontSize: "1.2rem", fontFamily: "Inter, sans-serif" }}>Click anywhere here to start the video with sound.</p>
           </div>
         )}
+      </div>
+    );
+  }
+
+  if (displayMode === "announcement") {
+    return (
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          background: "linear-gradient(135deg, #0a0f1e 0%, #111827 50%, #0a0f1e 100%)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#fff",
+          borderRadius: "6px",
+          padding: "40px",
+          textAlign: "center",
+          border: "1px solid rgba(212,175,55,0.1)",
+        }}
+      >
+        <div style={{ fontSize: "64px", marginBottom: "20px", opacity: 0.9 }}>📢</div>
+        <h2 style={{ fontFamily: "Montserrat, Arial, sans-serif", fontSize: "2.5rem", color: "#d4af37", marginBottom: "30px", textTransform: "uppercase", letterSpacing: "2px" }}>Announcement</h2>
+        <p style={{ fontFamily: "Inter, Arial, sans-serif", fontSize: "1.8rem", color: "rgba(255,255,255,0.9)", lineHeight: "1.6", whiteSpace: "pre-wrap", maxWidth: "80%" }}>
+          {announcementText || "No announcement at this time."}
+        </p>
       </div>
     );
   }

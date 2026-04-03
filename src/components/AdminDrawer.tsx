@@ -10,10 +10,11 @@ interface Props {
 }
 
 const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
-  const [tab, setTab] = useState<"rates" | "currencies" | "upload" | "settings">("rates");
+  const [tab, setTab] = useState<"rates" | "currencies" | "display" | "settings">("rates");
   const [editRates, setEditRates] = useState<CurrencyRate[]>(() => state.currencies.map(c => ({ ...c })));
   const [feedback, setFeedback] = useState("");
-  const [videoUrlInput, setVideoUrlInput] = useState(state.videoUrl || "");
+  const [displayMode, setDisplayMode] = useState<"video" | "announcement">(state.displayMode || "video");
+  const [announcementText, setAnnouncementText] = useState(state.announcementText || "");
   const [companyInput, setCompanyInput] = useState(state.companyName);
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
@@ -78,9 +79,9 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
     flash("Currency added");
   };
 
-  const saveVideo = () => {
-    onUpdate({ ...state, videoUrl: videoUrlInput.trim() || undefined });
-    flash("Video URL saved");
+  const saveDisplay = () => {
+    onUpdate({ ...state, displayMode, announcementText });
+    flash("Display settings saved");
   };
 
   const saveCompany = () => {
@@ -118,7 +119,7 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
 
         {/* Tabs */}
         <div style={s.tabBar}>
-          {(["rates", "currencies", "upload", "settings"] as const).map(t => (
+          {(["rates", "currencies", "display", "settings"] as const).map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -306,16 +307,36 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
             </div>
           )}
 
-          {tab === "upload" && (
+          {tab === "display" && (
             <div>
-              <p style={s.sectionTitle}>Video URL</p>
-              <input
-                value={videoUrlInput}
-                onChange={e => setVideoUrlInput(e.target.value)}
-                placeholder="Paste video URL (mp4)"
-                style={{ ...s.input, width: "100%", marginBottom: "12px" }}
-              />
-              <button onClick={saveVideo} style={s.primaryBtn}>SAVE VIDEO URL</button>
+              <p style={s.sectionTitle}>Content Mode</p>
+              <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+                <button
+                  onClick={() => setDisplayMode("video")}
+                  style={{ ...s.primaryBtn, marginTop: 0, background: displayMode === "video" ? "linear-gradient(180deg, #d4af37, #b8962e)" : "rgba(255,255,255,0.05)", color: displayMode === "video" ? "#06101d" : "#fff" }}
+                >
+                  VIDEO
+                </button>
+                <button
+                  onClick={() => setDisplayMode("announcement")}
+                  style={{ ...s.primaryBtn, marginTop: 0, background: displayMode === "announcement" ? "linear-gradient(180deg, #d4af37, #b8962e)" : "rgba(255,255,255,0.05)", color: displayMode === "announcement" ? "#06101d" : "#fff" }}
+                >
+                  ANNOUNCEMENT
+                </button>
+              </div>
+
+              {displayMode === "announcement" && (
+                <>
+                  <p style={s.sectionTitle}>Announcement Text</p>
+                  <textarea
+                    value={announcementText}
+                    onChange={e => setAnnouncementText(e.target.value)}
+                    placeholder="Enter announcement text here..."
+                    style={{ ...s.input, width: "100%", height: "120px", resize: "vertical", marginBottom: "12px", fontFamily: "Inter, sans-serif" }}
+                  />
+                </>
+              )}
+              <button onClick={saveDisplay} style={s.primaryBtn}>SAVE DISPLAY SETTINGS</button>
             </div>
           )}
 
