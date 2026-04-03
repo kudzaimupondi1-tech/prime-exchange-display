@@ -137,20 +137,36 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
                 <div key={r.code} style={s.rateRow}>
                   <span style={s.rateLabel}>{r.flag} {r.code}</span>
                   <input
+                    inputMode="decimal"
                     value={r.buy}
+                    onKeyPress={(e) => {
+                      if (!/[0-9.]/.test(e.key)) e.preventDefault();
+                    }}
                     onChange={e => {
+                      let val = e.target.value.replace(/[^0-9.]/g, '');
+                      if ((val.match(/\./g) || []).length > 1) {
+                         val = val.substring(0, val.lastIndexOf('.'));
+                      }
                       const next = [...editRates];
-                      next[i] = { ...next[i], buy: e.target.value };
+                      next[i] = { ...next[i], buy: val };
                       setEditRates(next);
                     }}
                     placeholder="Buy"
                     style={s.input}
                   />
                   <input
+                    inputMode="decimal"
                     value={r.sell}
+                    onKeyPress={(e) => {
+                      if (!/[0-9.]/.test(e.key)) e.preventDefault();
+                    }}
                     onChange={e => {
+                      let val = e.target.value.replace(/[^0-9.]/g, '');
+                      if ((val.match(/\./g) || []).length > 1) {
+                         val = val.substring(0, val.lastIndexOf('.'));
+                      }
                       const next = [...editRates];
-                      next[i] = { ...next[i], sell: e.target.value };
+                      next[i] = { ...next[i], sell: val };
                       setEditRates(next);
                     }}
                     placeholder="Sell"
@@ -251,8 +267,30 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
                 </div>
 
                 <input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="Currency Name" style={{ ...s.input, gridColumn: "1/3" }} />
-                <input value={customBuy} onChange={e => setCustomBuy(e.target.value)} placeholder="Buy rate" style={s.input} />
-                <input value={customSell} onChange={e => setCustomSell(e.target.value)} placeholder="Sell rate" style={s.input} />
+                <input 
+                  inputMode="decimal"
+                  value={customBuy} 
+                  onKeyPress={(e) => { if (!/[0-9.]/.test(e.key)) e.preventDefault(); }}
+                  onChange={e => {
+                    let val = e.target.value.replace(/[^0-9.]/g, '');
+                    if ((val.match(/\./g) || []).length > 1) val = val.substring(0, val.lastIndexOf('.'));
+                    setCustomBuy(val);
+                  }} 
+                  placeholder="Buy rate" 
+                  style={s.input} 
+                />
+                <input 
+                  inputMode="decimal"
+                  value={customSell} 
+                  onKeyPress={(e) => { if (!/[0-9.]/.test(e.key)) e.preventDefault(); }}
+                  onChange={e => {
+                    let val = e.target.value.replace(/[^0-9.]/g, '');
+                    if ((val.match(/\./g) || []).length > 1) val = val.substring(0, val.lastIndexOf('.'));
+                    setCustomSell(val);
+                  }} 
+                  placeholder="Sell rate" 
+                  style={s.input} 
+                />
               </div>
               <button onClick={addCustom} style={s.primaryBtn}>ADD CURRENCY</button>
 

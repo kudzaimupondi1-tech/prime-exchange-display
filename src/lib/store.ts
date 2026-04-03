@@ -45,13 +45,23 @@ export function saveState(state: AppState) {
 }
 
 export function formatWithCommas(val: string): string {
-  const num = val.replace(/[^0-9]/g, "");
-  if (!num) return "—";
-  return num.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const parts = val.replace(/[^0-9.]/g, "").split(".");
+  let intPart = parts[0];
+  if (!intPart && parts.length === 1) return "—";
+  intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  if (parts.length > 1) {
+    return `${intPart}.${parts[1]}`;
+  }
+  return intPart;
 }
 
 export function formatWithSpaces(val: string): string {
-  const num = val.replace(/[^0-9]/g, "");
-  if (!num) return "—";
-  return num.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  const parts = val.replace(/[^0-9.]/g, "").split(".");
+  let intPart = parts[0];
+  if (!intPart && parts.length === 1) return "—";
+  intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  if (parts.length > 1) {
+    return `${intPart}.${parts[1]}`;
+  }
+  return intPart;
 }

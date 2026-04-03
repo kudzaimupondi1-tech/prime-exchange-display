@@ -1,56 +1,135 @@
 import { useState, useRef, useEffect } from "react";
 
 interface Props {
-  videoUrl?: string;
+  videoUrl?: string; // Kept for backwards compatibility
   companyName: string;
 }
 
+const PLAYLIST = [
+  "/(1080p).mp4",
+  "/0778728_A_life_well_linked_Internet___Corporate_Banking_TVC(1080p).mp4",
+  "/AFC_Savings_Account(1080p).mp4",
+  "/A_life_well_linked(1080p).mp4",
+  "/Private_Banking(1080p).mp4"
+];
+
 const VideoPanelNew = ({ companyName }: Props) => {
   const [hasError, setHasError] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  const formattedUrl = "/Media1.mp4";
   const showVideo = !hasError;
+
+  const [activePlayer, setActivePlayer] = useState<0 | 1>(0);
+  const [src0, setSrc0] = useState(PLAYLIST[0]);
+  const [src1, setSrc1] = useState(PLAYLIST[1 % PLAYLIST.length]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const videoRef0 = useRef<HTMLVideoElement>(null);
+  const videoRef1 = useRef<HTMLVideoElement>(null);
 
   const [needsInteraction, setNeedsInteraction] = useState(false);
 
   useEffect(() => {
-    if (videoRef.current && showVideo) {
-      videoRef.current.volume = 1.0;
-      videoRef.current.muted = false;
-      const playPromise = videoRef.current.play();
-      
-      if (playPromise !== undefined) {
-        playPromise.catch((err) => {
-          console.warn("Browser blocked unmuted autoplay.", err);
-          // Browser requires user interaction to play audio
-          setNeedsInteraction(true);
-        });
+    if (showVideo) {
+      const activeRef = activePlayer === 0 ? videoRef0 : videoRef1;
+      if (activeRef.current) {
+        activeRef.current.volume = 1.0;
+        activeRef.current.muted = false;
+        const playPromise = activeRef.current.play();
+        
+        if (playPromise !== undefined) {
+          playPromise.catch((err) => {
+            console.warn("Browser blocked unmuted autoplay.", err);
+            setNeedsInteraction(true);
+          });
+        }
       }
     }
   }, [showVideo]);
 
   const forcePlay = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = false;
-      videoRef.current.play().catch(console.error);
+    const activeRef = activePlayer === 0 ? videoRef0 : videoRef1;
+    if (activeRef.current) {
+      activeRef.current.muted = false;
+      activeRef.current.play().catch(console.error);
       setNeedsInteraction(false);
     }
   };
 
+  const handleVideoEnded = () => {
+    const nextIndex = (currentIndex + 1) % PLAYLIST.length;
+    const preloadIndex = (nextIndex + 1) % PLAYLIST.length;
+    
+    if (activePlayer === 0) {
+      // Player 0 ended. Activate player 1.
+      setActivePlayer(1);
+      if (videoRef1.current) {
+        videoRef1.current.volume = 1.0;
+        videoRef1.current.muted = false;
+        videoRef1.current.currentTime = 0;
+        videoRef1.current.play().catch(e => console.error("Play error:", e));
+      }
+      // Prepare player 0 for the next round
+      setSrc0(PLAYLIST[preloadIndex]);
+    } else {
+      // Player 1 ended. Activate player 0.
+      setActivePlayer(0);
+      if (videoRef0.current) {
+        videoRef0.current.volume = 1.0;
+        videoRef0.current.muted = false;
+        videoRef0.current.currentTime = 0;
+        videoRef0.current.play().catch(e => console.error("Play error:", e));
+      }
+      // Prepare player 1 for the next round
+      setSrc1(PLAYLIST[preloadIndex]);
+    }
+    setCurrentIndex(nextIndex);
+  };
+
   if (showVideo) {
     return (
-      <div style={{ height: "100%", display: "flex", justifyContent: "flex-end", overflow: "hidden", background: "transparent", borderRadius: "6px" }}>
+      <div style={{ height: "100%", width: "100%", position: "relative", display: "flex", justifyContent: "flex-end", overflow: "hidden", background: "#000", borderRadius: "6px" }}>
+        {/* PLAYER 0 */}
         <video
-          key={formattedUrl}
-          ref={videoRef}
-          style={{ height: "100%", width: "auto", maxWidth: "100%", objectFit: "contain", borderRadius: "6px" }}
-          autoPlay
-          loop
+          ref={videoRef0}
+          style={{ 
+            position: "absolute",
+            top: 0, left: 0, right: 0, bottom: 0,
+            height: "100%", width: "100%", objectFit: "contain", borderRadius: "6px",
+            opacity: activePlayer === 0 ? 1 : 0, 
+            transition: "opacity 0.4s ease-in-out",
+            zIndex: activePlayer === 0 ? 10 : 1
+          }}
           playsInline
-          onError={() => setHasError(true)}
-          src={formattedUrl}
+          onEnded={activePlayer === 0 ? handleVideoEnded : undefined}
+          onError={(e) => {
+            if (activePlayer === 0) {
+              console.error("Video0 error:", src0);
+              handleVideoEnded();
+            }
+          }}
+          src={src0}
         />
+        {/* PLAYER 1 */}
+        <video
+          ref={videoRef1}
+          style={{ 
+            position: "absolute",
+            top: 0, left: 0, right: 0, bottom: 0,
+            height: "100%", width: "100%", objectFit: "contain", borderRadius: "6px",
+            opacity: activePlayer === 1 ? 1 : 0, 
+            transition: "opacity 0.4s ease-in-out",
+            zIndex: activePlayer === 1 ? 10 : 1
+          }}
+          playsInline
+          onEnded={activePlayer === 1 ? handleVideoEnded : undefined}
+          onError={(e) => {
+            if (activePlayer === 1) {
+              console.error("Video1 error:", src1);
+              handleVideoEnded();
+            }
+          }}
+          src={src1}
+        />
+        
         {needsInteraction && (
           <div
             onClick={forcePlay}
