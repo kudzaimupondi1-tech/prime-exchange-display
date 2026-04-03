@@ -1,0 +1,71 @@
+import { useState, useEffect, useCallback } from "react";
+
+const FullscreenHint = () => {
+  const [visible, setVisible] = useState(true);
+
+  const goFullscreen = useCallback(() => {
+    document.documentElement.requestFullscreen?.().catch(() => {});
+    setVisible(false);
+  }, []);
+
+  useEffect(() => {
+    const handleClick = () => goFullscreen();
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "F11") e.preventDefault();
+      goFullscreen();
+    };
+
+    window.addEventListener("click", handleClick, { once: true });
+    window.addEventListener("keydown", handleKey, { once: true });
+
+    const timer = setTimeout(() => setVisible(false), 4500);
+
+    return () => {
+      window.removeEventListener("click", handleClick);
+      window.removeEventListener("keydown", handleKey);
+      clearTimeout(timer);
+    };
+  }, [goFullscreen]);
+
+  if (!visible) return null;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        background: "rgba(0,0,0,0.85)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        animation: "fade-hint 4.5s ease-in-out forwards",
+      }}
+    >
+      <p
+        style={{
+          fontFamily: "Montserrat, Arial, sans-serif",
+          fontSize: "clamp(1.2rem, 2.5vw, 2rem)",
+          fontWeight: 700,
+          color: "#FFFFFF",
+          marginBottom: "12px",
+          letterSpacing: "2px",
+        }}
+      >
+        Click or press any key to go fullscreen
+      </p>
+      <p
+        style={{
+          fontFamily: "Inter, Arial, sans-serif",
+          fontSize: "clamp(0.7rem, 1vw, 0.9rem)",
+          color: "rgba(255,255,255,0.5)",
+        }}
+      >
+        TV remote · Keyboard · Mouse click
+      </p>
+    </div>
+  );
+};
+
+export default FullscreenHint;

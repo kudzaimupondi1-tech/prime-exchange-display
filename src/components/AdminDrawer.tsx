@@ -1,0 +1,424 @@
+import { useState } from "react";
+import { AppState, CurrencyRate } from "@/lib/store";
+import { PRESET_CURRENCIES } from "@/lib/currencies";
+import { ALL_COUNTRIES, Country } from "@/lib/countries";
+
+interface Props {
+  state: AppState;
+  onUpdate: (state: AppState) => void;
+  onClose: () => void;
+}
+
+const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
+  const [tab, setTab] = useState<"rates" | "currencies" | "upload" | "settings">("rates");
+  const [editRates, setEditRates] = useState<CurrencyRate[]>(() => state.currencies.map(c => ({ ...c })));
+  const [feedback, setFeedback] = useState("");
+  const [videoUrlInput, setVideoUrlInput] = useState(state.videoUrl || "");
+  const [companyInput, setCompanyInput] = useState(state.companyName);
+  const [newPass, setNewPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [customCode, setCustomCode] = useState("");
+  const [customName, setCustomName] = useState("");
+  const [customCountry, setCustomCountry] = useState("");
+  const [customBuy, setCustomBuy] = useState("");
+  const [customSell, setCustomSell] = useState("");
+  const [countrySearch, setCountrySearch] = useState("");
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
+
+  const flash = (msg: string) => {
+    setFeedback(msg);
+    setTimeout(() => setFeedback(""), 2500);
+  };
+
+  const saveRates = () => {
+    const cleaned = editRates.map(r => ({ ...r, buy: r.buy.trim(), sell: r.sell.trim() }));
+    onUpdate({ ...state, currencies: cleaned });
+    flash("Rates saved!");
+  };
+
+  const removeCurrency = (code: string) => {
+    const next = editRates.filter(r => r.code !== code);
+    setEditRates(next);
+    onUpdate({ ...state, currencies: next });
+    flash(`${code} removed`);
+  };
+
+  const addPreset = (preset: typeof PRESET_CURRENCIES[0]) => {
+    if (editRates.find(r => r.code === preset.code)) { flash(`${preset.code} already added`); return; }
+    const newRate: CurrencyRate = { ...preset, buy: "", sell: "" };
+    const next = [...editRates, newRate];
+    setEditRates(next);
+    onUpdate({ ...state, currencies: next });
+    flash(`${preset.code} added`);
+  };
+
+  const selectCountry = (country: Country) => {
+    setCustomCountry(country.code);
+    setShowCountryPicker(false);
+    setCountrySearch("");
+  };
+
+  const addCustom = () => {
+    if (customCode.length !== 3) { flash("Code must be 3 letters"); return; }
+    if (!customCountry) { flash("Please select a country flag"); return; }
+    if (editRates.find(r => r.code === customCode.toUpperCase())) { flash("Already exists"); return; }
+    const country = ALL_COUNTRIES.find(c => c.code === customCountry);
+    const newRate: CurrencyRate = {
+      code: customCode.toUpperCase(),
+      name: customName.toUpperCase() || customCode.toUpperCase(),
+      flag: country?.flag || "💱",
+      countryCode: customCountry.toLowerCase(),
+      buy: customBuy,
+      sell: customSell,
+    };
+    const next = [...editRates, newRate];
+    setEditRates(next);
+    onUpdate({ ...state, currencies: next });
+    setCustomCode(""); setCustomName(""); setCustomCountry(""); setCustomBuy(""); setCustomSell("");
+    flash("Currency added");
+  };
+
+  const saveVideo = () => {
+    onUpdate({ ...state, videoUrl: videoUrlInput.trim() || undefined });
+    flash("Video URL saved");
+  };
+
+  const saveCompany = () => {
+    onUpdate({ ...state, companyName: companyInput.trim().toUpperCase() || "AFC BANK" });
+    flash("Company name updated");
+  };
+
+  const updatePassword = () => {
+    if (newPass.length < 4) { flash("Min 4 characters"); return; }
+    if (newPass !== confirmPass) { flash("Passwords don't match"); return; }
+    onUpdate({ ...state, adminPassword: newPass });
+    setNewPass(""); setConfirmPass("");
+    flash("Password updated");
+  };
+
+  const s = styles;
+  const availablePresets = PRESET_CURRENCIES.filter(p => !editRates.find(r => r.code === p.code));
+  const selectedCountry = ALL_COUNTRIES.find(c => c.code === customCountry);
+  const filteredCountries = ALL_COUNTRIES.filter(c =>
+    c.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
+    c.code.toLowerCase().includes(countrySearch.toLowerCase())
+  );
+
+  return (
+    <div style={s.overlay} onClick={onClose}>
+      <div style={s.drawer} onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div style={s.header}>
+          <span style={s.headerTitle}>ADMIN PANEL</span>
+          <button onClick={onClose} style={s.closeBtn}>✕</button>
+        </div>
+
+        {/* Feedback */}
+        {feedback && <div style={s.feedback}>{feedback}</div>}
+
+        {/* Tabs */}
+        <div style={s.tabBar}>
+          {(["rates", "currencies", "upload", "settings"] as const).map(t => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              style={{ ...s.tab, ...(tab === t ? s.tabActive : {}) }}
+            >
+              {t.toUpperCase()}
+            </button>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div style={s.content}>
+          {tab === "rates" && (
+            <div>
+              {editRates.map((r, i) => (
+                <div key={r.code} style={s.rateRow}>
+                  <span style={s.rateLabel}>{r.flag} {r.code}</span>
+                  <input
+                    value={r.buy}
+                    onChange={e => {
+                      const next = [...editRates];
+                      next[i] = { ...next[i], buy: e.target.value };
+                      setEditRates(next);
+                    }}
+                    placeholder="Buy"
+                    style={s.input}
+                  />
+                  <input
+                    value={r.sell}
+                    onChange={e => {
+                      const next = [...editRates];
+                      next[i] = { ...next[i], sell: e.target.value };
+                      setEditRates(next);
+                    }}
+                    placeholder="Sell"
+                    style={s.input}
+                  />
+                </div>
+              ))}
+              <button onClick={saveRates} style={s.primaryBtn}>SAVE RATES</button>
+            </div>
+          )}
+
+          {tab === "currencies" && (
+            <div>
+              <p style={s.sectionTitle}>Active Currencies</p>
+              {editRates.map(r => (
+                <div key={r.code} style={s.currRow}>
+                  <span style={s.rateLabel}>{r.flag} {r.code} — {r.name}</span>
+                  <button onClick={() => removeCurrency(r.code)} style={s.removeBtn}>Remove</button>
+                </div>
+              ))}
+
+              <p style={{ ...s.sectionTitle, marginTop: "20px" }}>Add Custom Currency</p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "8px" }}>
+                <input value={customCode} onChange={e => setCustomCode(e.target.value)} placeholder="Code (3 letters)" style={s.input} maxLength={3} />
+                
+                {/* Country/Flag Picker */}
+                <div style={{ position: "relative" }}>
+                  <button
+                    onClick={() => setShowCountryPicker(!showCountryPicker)}
+                    style={{
+                      ...s.input,
+                      width: "100%",
+                      textAlign: "left",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    {selectedCountry ? (
+                      <>{selectedCountry.flag} {selectedCountry.name}</>
+                    ) : (
+                      <span style={{ color: "rgba(255,255,255,0.4)" }}>Select Flag 🏳️</span>
+                    )}
+                  </button>
+                  
+                  {showCountryPicker && (
+                    <div style={{
+                      position: "absolute",
+                      top: "100%",
+                      left: 0,
+                      right: 0,
+                      zIndex: 100,
+                      background: "#0d1b2a",
+                      border: "1px solid rgba(212,175,55,0.3)",
+                      borderRadius: "6px",
+                      maxHeight: "250px",
+                      overflow: "hidden",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}>
+                      <input
+                        value={countrySearch}
+                        onChange={e => setCountrySearch(e.target.value)}
+                        placeholder="Search country..."
+                        style={{ ...s.input, borderRadius: 0, borderBottom: "1px solid rgba(255,255,255,0.1)" }}
+                        autoFocus
+                      />
+                      <div style={{ overflowY: "auto", maxHeight: "200px" }}>
+                        {filteredCountries.map(c => (
+                          <button
+                            key={c.code}
+                            onClick={() => selectCountry(c)}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              width: "100%",
+                              padding: "8px 10px",
+                              background: "none",
+                              border: "none",
+                              borderBottom: "1px solid rgba(255,255,255,0.05)",
+                              color: "#fff",
+                              fontSize: "12px",
+                              cursor: "pointer",
+                              textAlign: "left",
+                              fontFamily: "Inter, sans-serif",
+                            }}
+                          >
+                            <span style={{ fontSize: "16px" }}>{c.flag}</span>
+                            <span>{c.name}</span>
+                            <span style={{ color: "rgba(255,255,255,0.3)", marginLeft: "auto", fontSize: "10px" }}>{c.code.toUpperCase()}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="Currency Name" style={{ ...s.input, gridColumn: "1/3" }} />
+                <input value={customBuy} onChange={e => setCustomBuy(e.target.value)} placeholder="Buy rate" style={s.input} />
+                <input value={customSell} onChange={e => setCustomSell(e.target.value)} placeholder="Sell rate" style={s.input} />
+              </div>
+              <button onClick={addCustom} style={s.primaryBtn}>ADD CURRENCY</button>
+
+              <p style={{ ...s.sectionTitle, marginTop: "20px" }}>Preset Currencies ({availablePresets.length})</p>
+              <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+                {availablePresets.map(p => (
+                  <div key={p.code} style={s.currRow}>
+                    <span style={s.rateLabel}>{p.flag} {p.code} — {p.name}</span>
+                    <button onClick={() => addPreset(p)} style={s.addBtn}>Add</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {tab === "upload" && (
+            <div>
+              <p style={s.sectionTitle}>Video URL</p>
+              <input
+                value={videoUrlInput}
+                onChange={e => setVideoUrlInput(e.target.value)}
+                placeholder="Paste video URL (mp4)"
+                style={{ ...s.input, width: "100%", marginBottom: "12px" }}
+              />
+              <button onClick={saveVideo} style={s.primaryBtn}>SAVE VIDEO URL</button>
+            </div>
+          )}
+
+          {tab === "settings" && (
+            <div>
+              <p style={s.sectionTitle}>Company Name</p>
+              <input
+                value={companyInput}
+                onChange={e => setCompanyInput(e.target.value)}
+                placeholder="Company Name"
+                style={{ ...s.input, width: "100%", marginBottom: "8px" }}
+              />
+              <button onClick={saveCompany} style={{ ...s.primaryBtn, marginBottom: "24px" }}>SAVE NAME</button>
+
+              <p style={s.sectionTitle}>Change Password</p>
+              <input
+                type="password"
+                value={newPass}
+                onChange={e => setNewPass(e.target.value)}
+                placeholder="New Password"
+                style={{ ...s.input, width: "100%", marginBottom: "8px" }}
+              />
+              <input
+                type="password"
+                value={confirmPass}
+                onChange={e => setConfirmPass(e.target.value)}
+                placeholder="Confirm Password"
+                style={{ ...s.input, width: "100%", marginBottom: "8px" }}
+              />
+              <button onClick={updatePassword} style={s.primaryBtn}>UPDATE PASSWORD</button>
+            </div>
+          )}
+        </div>
+
+        {/* Logout */}
+        <button onClick={onClose} style={s.logoutBtn}>LOGOUT & CLOSE</button>
+      </div>
+    </div>
+  );
+};
+
+const styles: Record<string, React.CSSProperties> = {
+  overlay: {
+    position: "fixed", inset: 0, zIndex: 10000,
+    background: "rgba(0,0,0,0.5)",
+    display: "flex", justifyContent: "flex-end",
+  },
+  drawer: {
+    width: "420px", maxWidth: "90vw", height: "100%",
+    background: "#06101d",
+    display: "flex", flexDirection: "column",
+    overflow: "hidden",
+    boxShadow: "-4px 0 30px rgba(0,0,0,0.6)",
+  },
+  header: {
+    display: "flex", justifyContent: "space-between", alignItems: "center",
+    padding: "16px 20px",
+    borderBottom: "1px solid rgba(212,175,55,0.2)",
+  },
+  headerTitle: {
+    fontFamily: "Montserrat, Arial, sans-serif",
+    fontWeight: 700, fontSize: "14px", color: "#d4af37",
+    letterSpacing: "3px",
+  },
+  closeBtn: {
+    background: "none", border: "none", color: "rgba(255,255,255,0.5)",
+    fontSize: "18px", cursor: "pointer", padding: "4px",
+  },
+  feedback: {
+    background: "rgba(212,175,55,0.15)", color: "#d4af37",
+    padding: "8px 20px", fontSize: "13px",
+    fontFamily: "Inter, Arial, sans-serif",
+  },
+  tabBar: {
+    display: "flex", borderBottom: "1px solid rgba(255,255,255,0.08)",
+  },
+  tab: {
+    flex: 1, padding: "10px 0", background: "none", border: "none",
+    color: "rgba(255,255,255,0.4)", fontSize: "11px", fontWeight: 700,
+    letterSpacing: "1px", cursor: "pointer",
+    fontFamily: "Montserrat, Arial, sans-serif",
+    borderBottom: "2px solid transparent",
+  },
+  tabActive: {
+    color: "#d4af37",
+    borderBottomColor: "#d4af37",
+  },
+  content: {
+    flex: 1, overflowY: "auto", padding: "16px 20px",
+  },
+  rateRow: {
+    display: "grid", gridTemplateColumns: "80px 1fr 1fr", gap: "8px",
+    alignItems: "center", marginBottom: "8px",
+  },
+  rateLabel: {
+    fontSize: "12px", fontWeight: 700, color: "#d4af37",
+    fontFamily: "monospace", whiteSpace: "nowrap",
+  },
+  input: {
+    background: "#0d1b2a", border: "1px solid rgba(255,255,255,0.12)",
+    borderRadius: "6px", padding: "8px 10px",
+    color: "#fff", fontSize: "13px",
+    fontFamily: "monospace", outline: "none",
+  },
+  primaryBtn: {
+    width: "100%", padding: "10px", marginTop: "8px",
+    background: "linear-gradient(180deg, #d4af37, #b8962e)",
+    color: "#06101d", border: "none", borderRadius: "6px",
+    fontFamily: "Montserrat, Arial, sans-serif",
+    fontWeight: 700, fontSize: "12px", letterSpacing: "2px",
+    cursor: "pointer",
+  },
+  sectionTitle: {
+    color: "rgba(255,255,255,0.5)", fontSize: "11px", fontWeight: 600,
+    letterSpacing: "2px", marginBottom: "10px",
+    fontFamily: "Montserrat, Arial, sans-serif",
+    textTransform: "uppercase" as const,
+  },
+  currRow: {
+    display: "flex", justifyContent: "space-between", alignItems: "center",
+    padding: "6px 0", borderBottom: "1px solid rgba(255,255,255,0.05)",
+  },
+  removeBtn: {
+    background: "rgba(220,50,50,0.15)", color: "#ef4444",
+    border: "1px solid rgba(220,50,50,0.3)", borderRadius: "4px",
+    padding: "4px 10px", fontSize: "11px", cursor: "pointer",
+    fontWeight: 600,
+  },
+  addBtn: {
+    background: "rgba(212,175,55,0.15)", color: "#d4af37",
+    border: "1px solid rgba(212,175,55,0.3)", borderRadius: "4px",
+    padding: "4px 10px", fontSize: "11px", cursor: "pointer",
+    fontWeight: 600,
+  },
+  logoutBtn: {
+    padding: "12px", background: "none",
+    border: "none", borderTop: "1px solid rgba(255,255,255,0.08)",
+    color: "rgba(255,255,255,0.3)", fontSize: "11px", fontWeight: 700,
+    letterSpacing: "2px", cursor: "pointer",
+    fontFamily: "Montserrat, Arial, sans-serif",
+  },
+};
+
+export default AdminDrawer;
