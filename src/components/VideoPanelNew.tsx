@@ -30,9 +30,18 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
   // When playlist finishes loading from Supabase, update the stagnant initial sources
   useEffect(() => {
     if (playlist.length > 0) {
-      setSrc0(playlist[0]);
-      setSrc1(playlist[1 % playlist.length]);
-      setCurrentIndex(0);
+      let startIdx = 0;
+      const savedIndexStr = localStorage.getItem("primeVideoIndex");
+      if (savedIndexStr !== null) {
+        const parsedIdx = parseInt(savedIndexStr, 10);
+        if (!isNaN(parsedIdx) && parsedIdx >= 0 && parsedIdx < playlist.length) {
+          startIdx = parsedIdx;
+        }
+      }
+      
+      setSrc0(playlist[startIdx]);
+      setSrc1(playlist[(startIdx + 1) % playlist.length]);
+      setCurrentIndex(startIdx);
       setActivePlayer(0);
     }
   }, [playlist]);
@@ -40,34 +49,74 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
   const videoRef0 = useRef<HTMLVideoElement>(null);
   const videoRef1 = useRef<HTMLVideoElement>(null);
 
+  const hasRestoredTimeRef = useRef(false);
   const [needsInteraction, setNeedsInteraction] = useState(false);
 
+  const forcePlay = () => {
+    const activeRef = activePlayer === 0 ? videoRef0 : videoRef1;
+    if (activeRef.current) {
+      activeRef.current.muted = false;
+      activeRef.current.volume = 1.0;
+      activeRef.current.play().catch(console.error);
+      setNeedsInteraction(false);
+    }
+  };
+
+  // Periodically save current time to localStorage so it resumes after refresh
+  useEffect(() => {
+    if (showVideo) {
+       const intervalId = setInterval(() => {
+         const activeRef = activePlayer === 0 ? videoRef0 : videoRef1;
+         if (activeRef.current && !activeRef.current.paused) {
+           localStorage.setItem("primeVideoIndex", currentIndex.toString());
+           localStorage.setItem("primeVideoTime", activeRef.current.currentTime.toString());
+         }
+       }, 1000);
+       return () => clearInterval(intervalId);
+    }
+  }, [showVideo, activePlayer, currentIndex]);
+
+  // Auto-play with sound: start muted to satisfy browser autoplay policy,
+  // then immediately unmute so audio plays without any user interaction needed.
   useEffect(() => {
     if (showVideo) {
       const activeRef = activePlayer === 0 ? videoRef0 : videoRef1;
-      if (activeRef.current) {
-        activeRef.current.volume = 1.0;
-        activeRef.current.muted = false;
-        const playPromise = activeRef.current.play();
+      const el = activeRef.current;
+      if (el) {
         
+        // Restore time exactly once on initial load
+        if (!hasRestoredTimeRef.current) {
+           const savedTimeStr = localStorage.getItem("primeVideoTime");
+           if (savedTimeStr !== null) {
+              const savedTime = parseFloat(savedTimeStr);
+              if (!isNaN(savedTime) && savedTime > 0) {
+                  const applyTime = () => { el.currentTime = savedTime; };
+                  if (el.readyState >= 1) { // HAVE_METADATA
+                    applyTime();
+                  } else {
+                    el.addEventListener("loadedmetadata", applyTime, { once: true });
+                  }
+              }
+           }
+           hasRestoredTimeRef.current = true;
+        }
+
+        // We attempt to play unmuted first. If the browser blocks it, it will throw an error.
+        el.muted = false;
+        el.volume = 1.0;
+        const playPromise = el.play();
         if (playPromise !== undefined) {
           playPromise.catch((err) => {
-            console.warn("Browser blocked unmuted autoplay.", err);
+            console.warn("Browser blocked unmuted autoplay:", err);
+            // Fallback: play muted so the video is at least moving
+            el.muted = true;
+            el.play().catch(e => console.error("Muted fallback failed:", e));
             setNeedsInteraction(true);
           });
         }
       }
     }
   }, [showVideo, activePlayer]);
-
-  const forcePlay = () => {
-    const activeRef = activePlayer === 0 ? videoRef0 : videoRef1;
-    if (activeRef.current) {
-      activeRef.current.muted = false;
-      activeRef.current.play().catch(console.error);
-      setNeedsInteraction(false);
-    }
-  };
 
   const handleVideoEnded = () => {
     const nextIndex = (currentIndex + 1) % activePlaylist.length;
@@ -77,10 +126,17 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
       // Player 0 ended. Activate player 1.
       setActivePlayer(1);
       if (videoRef1.current) {
-        videoRef1.current.volume = 1.0;
-        videoRef1.current.muted = false;
         videoRef1.current.currentTime = 0;
-        videoRef1.current.play().catch(e => console.error("Play error:", e));
+        videoRef1.current.muted = false;
+        videoRef1.current.volume = 1.0;
+        videoRef1.current.play().catch(e => {
+            console.error("Play error:", e);
+            setNeedsInteraction(true);
+            if (videoRef1.current) {
+                videoRef1.current.muted = true;
+                videoRef1.current.play().catch(console.error);
+            }
+        });
       }
       setTimeout(() => {
         setSrc0(activePlaylist[preloadIndex]);
@@ -89,10 +145,17 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
       // Player 1 ended. Activate player 0.
       setActivePlayer(0);
       if (videoRef0.current) {
-        videoRef0.current.volume = 1.0;
-        videoRef0.current.muted = false;
         videoRef0.current.currentTime = 0;
-        videoRef0.current.play().catch(e => console.error("Play error:", e));
+        videoRef0.current.muted = false;
+        videoRef0.current.volume = 1.0;
+        videoRef0.current.play().catch(e => {
+            console.error("Play error:", e);
+            setNeedsInteraction(true);
+            if (videoRef0.current) {
+                videoRef0.current.muted = true;
+                videoRef0.current.play().catch(console.error);
+            }
+        });
       }
       setTimeout(() => {
         setSrc1(activePlaylist[preloadIndex]);
@@ -103,14 +166,14 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
 
   if (showVideo) {
     return (
-      <div style={{ height: "100%", width: "100%", position: "relative", display: "flex", justifyContent: "flex-end", overflow: "hidden", background: "#000", borderRadius: "6px" }}>
+      <div style={{ height: "100%", width: "100%", position: "relative", overflow: "hidden", background: "#000", borderRadius: "6px" }}>
         {/* PLAYER 0 */}
         <video
           ref={videoRef0}
           style={{ 
             position: "absolute",
             top: 0, left: 0, right: 0, bottom: 0,
-            height: "100%", width: "100%", objectFit: "contain", borderRadius: "6px",
+            height: "100%", width: "100%", objectFit: "fill", borderRadius: "6px",
             opacity: activePlayer === 0 ? 1 : 0, 
             transition: "opacity 0.4s ease-in-out",
             zIndex: activePlayer === 0 ? 10 : 1
@@ -132,7 +195,7 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
           style={{ 
             position: "absolute",
             top: 0, left: 0, right: 0, bottom: 0,
-            height: "100%", width: "100%", objectFit: "contain", borderRadius: "6px",
+            height: "100%", width: "100%", objectFit: "fill", borderRadius: "6px",
             opacity: activePlayer === 1 ? 1 : 0, 
             transition: "opacity 0.4s ease-in-out",
             zIndex: activePlayer === 1 ? 10 : 1
@@ -167,8 +230,8 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
               padding: "20px",
             }}
           >
-            <h1 style={{ fontSize: "2rem", marginBottom: "1rem", fontFamily: "Montserrat, sans-serif" }}>🔇 Browser Blocked Audio</h1>
-            <p style={{ fontSize: "1.2rem", fontFamily: "Inter, sans-serif" }}>Click anywhere here to start the video with sound.</p>
+            <h1 style={{ fontSize: "2rem", marginBottom: "1rem", fontFamily: "Montserrat, sans-serif" }}>🔇 Sound is Blocked</h1>
+            <p style={{ fontSize: "1.2rem", fontFamily: "Inter, sans-serif" }}>Your browser is blocking sound. Click anywhere to unmute.</p>
           </div>
         )}
       </div>

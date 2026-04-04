@@ -24,74 +24,74 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
         display: "flex",
         flexDirection: "column",
         border: "none",
-        borderRadius: "6px",
-        boxShadow: "0px 4px 12px rgba(0,0,0,0.4)",
+        borderRadius: "8px",
+        boxShadow: "0px 8px 20px rgba(0,0,0,0.4)",
         overflow: "hidden",
-        background: "#F5F7FA",
+        background: "#FFFFFF",
       }}
     >
-
-
-      {/* BLUE COLUMN HEADERS */}
+      {/* COLUMN HEADERS */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "35% 1fr 1fr",
+          gridTemplateColumns: "38% 1fr 1fr",
           background: "#0132B0",
-          borderBottom: "1px solid #002277",
+          borderBottom: "2px solid rgba(255,255,255,0.2)",
         }}
       >
         <span
           style={{
             fontFamily: "Montserrat, Arial, sans-serif",
-            fontWeight: 700,
+            fontWeight: 800,
             fontSize: "clamp(1.4rem, 2.4vw, 3.5rem)",
             color: "#FFFFFF",
-            padding: "12px",
-            textAlign: "center",
+            padding: "16px 20px",
+            textAlign: "left",
+            letterSpacing: "1px",
           }}
         >
-          Currency
+          CURRENCY
         </span>
         <span
           style={{
             fontFamily: "Montserrat, Arial, sans-serif",
-            fontWeight: 900,
+            fontWeight: 800,
             fontSize: "clamp(1.4rem, 2.4vw, 3.5rem)",
             color: "#FFFFFF",
-            padding: "12px",
+            padding: "16px",
             textAlign: "center",
-            borderLeft: "1px solid rgba(255,255,255,0.2)",
+            letterSpacing: "1px",
           }}
         >
-          We Buy
+          WE BUY
         </span>
         <span
           style={{
             fontFamily: "Montserrat, Arial, sans-serif",
-            fontWeight: 900,
+            fontWeight: 800,
             fontSize: "clamp(1.4rem, 2.4vw, 3.5rem)",
             color: "#FFFFFF",
-            padding: "12px",
+            padding: "16px",
             textAlign: "center",
-            borderLeft: "1px solid rgba(255,255,255,0.2)",
+            letterSpacing: "1px",
           }}
         >
-          We Sell
+          WE SELL
         </span>
       </div>
 
       {/* TABLE BODY */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        {displayed.map((rate) => (
+        {displayed.map((rate, index) => (
           <div
             key={rate.code}
             style={{
               display: "grid",
-              gridTemplateColumns: "35% 1fr 1fr",
+              gridTemplateColumns: "38% 1fr 1fr",
               alignItems: "center",
               flex: 1,
-              borderBottom: "1px solid #D0D0D0",
+              background: index % 2 === 0 ? "#FFFFFF" : "#F4F7F9",
+              borderBottom: "1px solid #CBD5E1", // slightly darker row line
             }}
           >
             {/* CURRENCY COLUMN */}
@@ -99,66 +99,41 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
               style={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between",
+                justifyContent: "flex-start",
+                gap: "16px",
                 height: "100%",
-                background: "#0132B0",
-                padding: "12px 20px",
-                borderBottom: "1px solid rgba(255,255,255,0.15)",
+                padding: "0 20px",
+                borderRight: "1px solid #CBD5E1", // slightly darker column line
               }}
             >
-              <span
-                style={{
-                  fontFamily: "Montserrat, Arial, sans-serif",
-                  fontSize: "clamp(1.2rem, 1.8vw, 3rem)",
-                  fontWeight: 800,
-                  color: "#FFFFFF",
-                  width: "60px",
-                }}
-              >
-                {rate.code}
-              </span>
-              
               {/* FLAG */}
               <div
                 style={{
-                  width: "48px",
-                  height: "32px",
+                  width: "clamp(48px, 4vw, 64px)",
+                  borderRadius: "4px",
                   overflow: "hidden",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   flexShrink: 0,
-                  background: "#ccc",
-                  border: "1px solid rgba(255,255,255,0.3)",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                 }}
               >
                 <FlagImage countryCode={rate.countryCode} flag={rate.flag} rateCode={rate.code} />
               </div>
 
-              {/* CIRCULAR CURRENCY SYMBOL */}
-              <div
+              {/* CURRENCY CODE */}
+              <span
                 style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "50%",
-                  background: "#E0E0E0",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
+                  fontFamily: "'Arial Rounded MT Bold', Arial, sans-serif",
+                  fontSize: "clamp(1.5rem, 2vw, 3.2rem)",
+                  fontWeight: 800,
+                  color: "#1E293B",
+                  letterSpacing: "1px",
                 }}
               >
-                <span
-                  style={{
-                    fontSize: "20px",
-                    fontWeight: 900,
-                    color: "#0132B0",
-                    fontFamily: "Roboto, Arial, sans-serif",
-                  }}
-                >
-                  {CURRENCY_SYMBOLS[rate.code] || rate.code[0]}
-                </span>
-              </div>
+                {rate.code}
+              </span>
             </div>
 
             {/* WE BUY */}
@@ -169,16 +144,15 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                background: "#EAEAEA",
-                borderLeft: "1px solid #B0B0B0",
+                borderRight: "1px solid #CBD5E1", // slightly darker column line
               }}
             >
               <span
                 style={{
                   fontFamily: "'Arial Rounded MT Bold', Arial, sans-serif",
-                  fontSize: "clamp(1.4rem, 2.6vw, 4rem)",
+                  fontSize: "clamp(1.5rem, 2.6vw, 4.2rem)",
                   fontWeight: 900,
-                  color: "#000000",
+                  color: "#059669", // professional green
                 }}
               >
                 {formatWithSpaces(rate.buy)}
@@ -193,16 +167,14 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                background: "#EAEAEA",
-                borderLeft: "1px solid #B0B0B0",
               }}
             >
               <span
                 style={{
                   fontFamily: "'Arial Rounded MT Bold', Arial, sans-serif",
-                  fontSize: "clamp(1.4rem, 2.6vw, 4rem)",
+                  fontSize: "clamp(1.5rem, 2.6vw, 4.2rem)",
                   fontWeight: 900,
-                  color: rate.sell ? "#C42021" : "#999999",
+                  color: rate.sell ? "#DC2626" : "#94A3B8", // professional red / empty grey
                 }}
               >
                 {rate.sell ? formatWithSpaces(rate.sell) : "—"}

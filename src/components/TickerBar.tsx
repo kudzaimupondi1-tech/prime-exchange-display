@@ -38,7 +38,7 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
   }, []);
 
   const timeStr = time.toLocaleTimeString("en-US", {
-    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true,
+    hour: "2-digit", minute: "2-digit", hour12: true,
   });
   const dateStr = time.toLocaleDateString("en-US", {
     month: "short", day: "numeric", year: "numeric",
@@ -192,35 +192,38 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
         style={{
           width: "clamp(160px, 15vw, 280px)",
           flexShrink: 0,
-          background: "#060d1a",
+          background: "linear-gradient(135deg, #0DAA48 0%, #066D28 100%)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          borderLeft: "1px solid rgba(255,255,255,0.06)",
+          borderLeft: "1px solid rgba(255,255,255,0.2)",
           position: "relative",
+          boxShadow: "inset 0px 4px 10px rgba(0,0,0,0.1)",
         }}
       >
         <span
           style={{
-            fontFamily: "'Roboto Mono', monospace",
-             fontSize: "clamp(1.4rem, 2vw, 3rem)",
-            fontWeight: 700,
+            fontFamily: "Montserrat, Arial, sans-serif",
+            fontSize: "clamp(1.5rem, 2.2vw, 3.2rem)",
+            fontWeight: 800,
             color: "#FFFFFF",
-            letterSpacing: "2px",
+            letterSpacing: "1px",
             lineHeight: 1,
+            textShadow: "1px 1px 3px rgba(0,0,0,0.3)",
           }}
         >
           {timeStr}
         </span>
         <span
           style={{
-            fontFamily: "Montserrat, sans-serif",
-             fontSize: "clamp(1rem, 1.4vw, 2rem)",
-            fontWeight: 500,
-            color: "#d4af37",
+            fontFamily: "Inter, Arial, sans-serif",
+            fontSize: "clamp(0.9rem, 1.2vw, 1.8rem)",
+            fontWeight: 600,
+            color: "rgba(255,255,255,0.9)",
             letterSpacing: "1px",
-            marginTop: "4px",
+            marginTop: "6px",
+            textTransform: "uppercase",
           }}
         >
           {dateStr}
@@ -228,13 +231,15 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
         <button
           onClick={onAdminClick}
           style={{
-            fontSize: "0.75rem",
-            color: "rgba(255,255,255,0.12)",
-            background: "none",
-            border: "none",
+            position: "absolute",
+            bottom: "0",
+            right: "0",
+            width: "40px",
+            height: "40px",
+            opacity: 0.1, // Visible but very faint
             cursor: "pointer",
-            marginTop: "6px",
-            padding: "2px",
+            background: "transparent",
+            border: "none",
           }}
           title="Admin"
         >

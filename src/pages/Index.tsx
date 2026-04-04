@@ -20,7 +20,7 @@ const Index = () => {
       setPlaylist(vp);
     };
     init();
-    
+
     // Auto-refresh the playlist every hour just in case new videos are dropped into the bucket
     const iv = setInterval(async () => {
       const vp = await fetchVideoUrls();
@@ -64,13 +64,30 @@ const Index = () => {
       <div style={{ padding: "8px 8px 0 8px" }}>
         <div
           style={{
+            position: "relative",
             background: "#C42021",
             padding: "15px 20px",
-            textAlign: "center",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             borderRadius: "6px",
+            overflow: "hidden",
           }}
         >
-          <h1 style={{ margin: 0, color: "#FFFFFF", fontFamily: "Montserrat, Arial, sans-serif", fontSize: "clamp(1rem, 2.2vw, 4rem)", letterSpacing: "1px" }}>
+          <img
+            src="/favicon.png"
+            alt="AFC Bank Logo"
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              height: "100%",
+              width: "auto",
+              objectFit: "contain",
+              zIndex: 0,
+            }}
+          />
+          <h1 style={{ position: "relative", zIndex: 1, margin: 0, color: "#FFFFFF", fontFamily: "Montserrat, Arial, sans-serif", fontSize: "clamp(1rem, 2.2vw, 4rem)", letterSpacing: "1px" }}>
             <span style={{ fontWeight: 900 }}>{state.companyName}</span>{" "}
             <span style={{ fontWeight: 800 }}>FOREIGN EXCHANGE RATES</span>
           </h1>
@@ -79,15 +96,15 @@ const Index = () => {
 
       {/* Main content */}
       <div style={{ flex: 1, display: "flex", minHeight: 0, marginTop: "8px" }}>
-        {/* Left: Exchange Rate Card — strictly constrained to prevent losing structure */}
-        <div style={{ width: "46%", flexShrink: 0, height: "100%", padding: "0 4px 8px 8px" }}>
+        {/* Left: Exchange Rate Card — 1 part ratio */}
+        <div style={{ flex: "1 1 0", height: "100%", padding: "0 4px 8px 8px" }}>
           <ExchangeRateCard rates={state.currencies} companyName={state.companyName} />
         </div>
 
-        {/* Right: Video Panel */}
-        <div style={{ flex: 1, height: "100%", padding: "0 8px 8px 4px", minWidth: 0, display: "flex", justifyContent: "flex-end" }}>
-          <VideoPanelNew 
-            companyName={state.companyName} 
+        {/* Right: Video Panel — 1.5 parts ratio */}
+        <div style={{ flex: "1.5 1 0", height: "100%", padding: "0 8px 8px 4px", minWidth: 0, display: "flex", justifyContent: "flex-end" }}>
+          <VideoPanelNew
+            companyName={state.companyName}
             displayMode={state.displayMode}
             announcementText={state.announcementText}
             playlist={playlist}

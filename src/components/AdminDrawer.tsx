@@ -342,15 +342,6 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
 
           {tab === "settings" && (
             <div>
-              <p style={s.sectionTitle}>Company Name</p>
-              <input
-                value={companyInput}
-                onChange={e => setCompanyInput(e.target.value)}
-                placeholder="Company Name"
-                style={{ ...s.input, width: "100%", marginBottom: "8px" }}
-              />
-              <button onClick={saveCompany} style={{ ...s.primaryBtn, marginBottom: "24px" }}>SAVE NAME</button>
-
               <p style={s.sectionTitle}>Change Password</p>
               <input
                 type="password"
