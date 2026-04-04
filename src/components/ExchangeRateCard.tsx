@@ -57,7 +57,7 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
             fontFamily: "Montserrat, Arial, sans-serif",
             fontWeight: 800,
             fontSize: "clamp(1.4rem, 2.4vw, 3.5rem)",
-            color: "#FFFFFF",
+            color: "#ffffffff",
             padding: "16px",
             textAlign: "center",
             letterSpacing: "1px",
@@ -103,6 +103,7 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
                 gap: "16px",
                 height: "100%",
                 padding: "0 20px",
+                background: "#0132B0",
                 borderRight: "1px solid rgba(0,0,0,0.05)",
               }}
             >
@@ -126,9 +127,9 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
               <span
                 style={{
                   fontFamily: "'Arial Rounded MT Bold', Arial, sans-serif",
-                  fontSize: "clamp(1.5rem, 2vw, 3.2rem)",
-                  fontWeight: 800,
-                  color: "#1E293B",
+                  fontSize: "clamp(1.8rem, 2.4vw, 3.2rem)",
+                  fontWeight: 700,
+                  color: "#ffffffff",
                   letterSpacing: "1px",
                 }}
               >
@@ -150,9 +151,9 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
               <span
                 style={{
                   fontFamily: "'Arial Rounded MT Bold', Arial, sans-serif",
-                  fontSize: "clamp(1.5rem, 2.6vw, 4.2rem)",
-                  fontWeight: 900,
-                  color: "#00893eff", // professional green
+                  fontSize: "clamp(1.8rem, 2.4vw, 3.2rem)",
+                  fontWeight: 800,
+                  color: "#2c7e25ff", // professional green
                 }}
               >
                 {formatWithSpaces(rate.buy)}
@@ -174,7 +175,7 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
                   fontFamily: "'Arial Rounded MT Bold', Arial, sans-serif",
                   fontSize: "clamp(1.5rem, 2.6vw, 4.2rem)",
                   fontWeight: 900,
-                  color: rate.sell ? "#DC2626" : "#94A3B8", // professional red / empty grey
+                  color: rate.sell ? "#ff0000ff" : "#94A3B8", // professional red / empty grey
                 }}
               >
                 {rate.sell ? formatWithSpaces(rate.sell) : "—"}
