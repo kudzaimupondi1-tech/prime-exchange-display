@@ -45,7 +45,7 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
           style={{
             fontFamily: "Montserrat, Arial, sans-serif",
             fontWeight: 700,
-            fontSize: "clamp(1.4rem, 2.4vw, 2.3rem)",
+            fontSize: "clamp(1.4rem, 2.4vw, 3.5rem)",
             color: "#FFFFFF",
             padding: "12px",
             textAlign: "center",
@@ -57,7 +57,7 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
           style={{
             fontFamily: "Montserrat, Arial, sans-serif",
             fontWeight: 900,
-            fontSize: "clamp(1.4rem, 2.4vw, 2.3rem)",
+            fontSize: "clamp(1.4rem, 2.4vw, 3.5rem)",
             color: "#FFFFFF",
             padding: "12px",
             textAlign: "center",
@@ -70,7 +70,7 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
           style={{
             fontFamily: "Montserrat, Arial, sans-serif",
             fontWeight: 900,
-            fontSize: "clamp(1.4rem, 2.4vw, 2.3rem)",
+            fontSize: "clamp(1.4rem, 2.4vw, 3.5rem)",
             color: "#FFFFFF",
             padding: "12px",
             textAlign: "center",
@@ -109,7 +109,7 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
               <span
                 style={{
                   fontFamily: "Montserrat, Arial, sans-serif",
-                  fontSize: "clamp(1.2rem, 1.8vw, 1.6rem)",
+                  fontSize: "clamp(1.2rem, 1.8vw, 3rem)",
                   fontWeight: 800,
                   color: "#FFFFFF",
                   width: "60px",
@@ -175,8 +175,8 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
             >
               <span
                 style={{
-                  fontFamily: "Roboto, Arial, sans-serif",
-                  fontSize: "clamp(1.4rem, 2.6vw, 2.4rem)",
+                  fontFamily: "'Arial Rounded MT Bold', Arial, sans-serif",
+                  fontSize: "clamp(1.4rem, 2.6vw, 4rem)",
                   fontWeight: 900,
                   color: "#000000",
                 }}
@@ -199,8 +199,8 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
             >
               <span
                 style={{
-                  fontFamily: "Roboto, Arial, sans-serif",
-                  fontSize: "clamp(1.4rem, 2.6vw, 2.4rem)",
+                  fontFamily: "'Arial Rounded MT Bold', Arial, sans-serif",
+                  fontSize: "clamp(1.4rem, 2.6vw, 4rem)",
                   fontWeight: 900,
                   color: rate.sell ? "#C42021" : "#999999",
                 }}
@@ -232,7 +232,7 @@ const FlagImage = ({ countryCode, flag, rateCode }: { countryCode: string; flag:
     <img
       src={`https://flagcdn.com/w40/${actualCode.toLowerCase()}.png`}
       alt={actualCode}
-      style={{ width: "40px", height: "auto", objectFit: "cover" }}
+      style={{ width: "clamp(40px, 4vw, 80px)", height: "auto", objectFit: "cover" }}
       onError={() => setError(true)}
     />
   );

@@ -23,7 +23,7 @@ const FlagImage = ({ countryCode, flag, rateCode }: { countryCode: string; flag:
     <img
       src={`https://flagcdn.com/w40/${actualCode.toLowerCase()}.png`}
       alt={actualCode}
-      style={{ width: "60px", height: "40px", objectFit: "cover", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.2)" }}
+      style={{ width: "clamp(40px, 4vw, 80px)", height: "clamp(26px, 2.6vw, 53px)", objectFit: "cover", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.2)" }}
       onError={() => setError(true)}
     />
   );
@@ -50,7 +50,9 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
   return (
     <div
       style={{
-        height: "110px",
+        height: "12vh",
+        minHeight: "80px",
+        maxHeight: "140px",
         display: "flex",
         width: "100%",
         flexShrink: 0,
@@ -60,7 +62,7 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
       {/* LIVE RATES badge */}
       <div
         style={{
-          width: "180px",
+          width: "clamp(140px, 15vw, 250px)",
           flexShrink: 0,
           background: "#cc0000",
           display: "flex",
@@ -82,7 +84,7 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
           style={{
             fontFamily: "Montserrat, Arial, sans-serif",
             fontWeight: 800,
-            fontSize: "clamp(0.9rem, 1.4vw, 1.2rem)",
+            fontSize: "clamp(0.9rem, 1.4vw, 2.5rem)",
             color: "#FFFFFF",
             letterSpacing: "1px",
             textTransform: "uppercase",
@@ -123,7 +125,7 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
               {/* Currency code */}
               <span style={{
                 fontFamily: "'Roboto Mono', monospace",
-                fontSize: "clamp(2rem, 3.6vw, 3rem)",
+                fontSize: "clamp(2rem, 3.6vw, 5rem)",
                 fontWeight: 700,
                 color: "#ffffff",
                 letterSpacing: "1px",
@@ -133,7 +135,7 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
 
               {/* BUY label */}
               <span style={{
-                fontSize: "clamp(1.5rem, 2.4vw, 2.1rem)",
+                fontSize: "clamp(1.5rem, 2.4vw, 4rem)",
                 color: "rgba(255,255,255,0.45)",
                 letterSpacing: "1px",
                 marginLeft: "10px",
@@ -143,8 +145,8 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
 
               {/* Buy value */}
               <span style={{
-                fontFamily: "'Roboto Mono', monospace",
-                fontSize: "clamp(2rem, 3.6vw, 3rem)",
+                 fontFamily: "'Arial Rounded MT Bold', Arial, sans-serif",
+                fontSize: "clamp(2rem, 3.6vw, 5rem)",
                 fontWeight: 700,
                 color: "#d4af37",
                 marginLeft: "8px",
@@ -155,16 +157,16 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
               {/* SELL separator */}
               <span style={{
                 color: "rgba(255,255,255,0.3)",
-                fontSize: "2rem",
-                margin: "0 8px",
+                 fontSize: "clamp(1.5rem, 2.4vw, 4rem)",
+                 margin: "0 clamp(8px, 1vw, 20px)",
               }}>
                  · SELL
               </span>
 
               {/* Sell value */}
               <span style={{
-                fontFamily: "'Roboto Mono', monospace",
-                fontSize: "clamp(2rem, 3.6vw, 3rem)",
+                 fontFamily: "'Arial Rounded MT Bold', Arial, sans-serif",
+                fontSize: "clamp(2rem, 3.6vw, 5rem)",
                 fontWeight: 700,
                 color: "#ff6b6b",
                 marginLeft: "8px",
@@ -175,8 +177,8 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
               {/* Dot separator: Every item gets one so the loop is perfectly symmetric */}
               <span style={{
                 color: "rgba(255,255,255,0.2)",
-                fontSize: "3.3rem",
-                margin: "0 30px",
+                 fontSize: "clamp(2rem, 3.3vw, 5rem)",
+                 margin: "0 clamp(15px, 2.5vw, 40px)",
               }}>
                 ·
               </span>
@@ -188,7 +190,7 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
       {/* Clock & Date */}
       <div
         style={{
-          width: "200px",
+          width: "clamp(160px, 15vw, 280px)",
           flexShrink: 0,
           background: "#060d1a",
           display: "flex",
@@ -202,7 +204,7 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
         <span
           style={{
             fontFamily: "'Roboto Mono', monospace",
-            fontSize: "clamp(1.4rem, 2vw, 1.85rem)",
+             fontSize: "clamp(1.4rem, 2vw, 3rem)",
             fontWeight: 700,
             color: "#FFFFFF",
             letterSpacing: "2px",
@@ -214,7 +216,7 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
         <span
           style={{
             fontFamily: "Montserrat, sans-serif",
-            fontSize: "clamp(1rem, 1.4vw, 1.3rem)",
+             fontSize: "clamp(1rem, 1.4vw, 2rem)",
             fontWeight: 500,
             color: "#d4af37",
             letterSpacing: "1px",

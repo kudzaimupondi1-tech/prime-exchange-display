@@ -70,7 +70,7 @@ const Index = () => {
             borderRadius: "6px",
           }}
         >
-          <h1 style={{ margin: 0, color: "#FFFFFF", fontFamily: "Montserrat, Arial, sans-serif", fontSize: "clamp(1rem, 2.2vw, 2.1rem)", letterSpacing: "1px" }}>
+          <h1 style={{ margin: 0, color: "#FFFFFF", fontFamily: "Montserrat, Arial, sans-serif", fontSize: "clamp(1rem, 2.2vw, 4rem)", letterSpacing: "1px" }}>
             <span style={{ fontWeight: 900 }}>{state.companyName}</span>{" "}
             <span style={{ fontWeight: 800 }}>FOREIGN EXCHANGE RATES</span>
           </h1>
