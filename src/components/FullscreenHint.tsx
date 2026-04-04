@@ -4,21 +4,26 @@ const FullscreenHint = () => {
   const [visible, setVisible] = useState(true);
 
   const goFullscreen = useCallback(() => {
-    document.documentElement.requestFullscreen?.().catch(() => {});
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.().catch(() => {});
+    }
+    window.dispatchEvent(new CustomEvent("force-video-play"));
     setVisible(false);
   }, []);
 
   useEffect(() => {
     const handleClick = () => goFullscreen();
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "F11") e.preventDefault();
+      if (e.key === "F11") {
+        e.preventDefault();
+      }
       goFullscreen();
     };
 
-    window.addEventListener("click", handleClick, { once: true });
-    window.addEventListener("keydown", handleKey, { once: true });
+    window.addEventListener("click", handleClick);
+    window.addEventListener("keydown", handleKey);
 
-    const timer = setTimeout(() => setVisible(false), 4500);
+    const timer = setTimeout(() => setVisible(false), 8000);
 
     return () => {
       window.removeEventListener("click", handleClick);
@@ -40,7 +45,7 @@ const FullscreenHint = () => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        animation: "fade-hint 4.5s ease-in-out forwards",
+        animation: "fade-hint 8s ease-in-out forwards",
       }}
     >
       <p

@@ -62,6 +62,14 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
     }
   };
 
+  useEffect(() => {
+    const handleGlobalPlay = () => {
+      forcePlay();
+    };
+    window.addEventListener("force-video-play", handleGlobalPlay);
+    return () => window.removeEventListener("force-video-play", handleGlobalPlay);
+  }, [activePlayer]);
+
   // Periodically save current time to localStorage so it resumes after refresh
   useEffect(() => {
     if (showVideo) {
@@ -174,8 +182,7 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
             position: "absolute",
             top: 0, left: 0, right: 0, bottom: 0,
             height: "100%", width: "100%", objectFit: "fill", borderRadius: "6px",
-            opacity: activePlayer === 0 ? 1 : 0, 
-            transition: "opacity 0.4s ease-in-out",
+            opacity: 1, 
             zIndex: activePlayer === 0 ? 10 : 1
           }}
           playsInline
@@ -196,8 +203,7 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
             position: "absolute",
             top: 0, left: 0, right: 0, bottom: 0,
             height: "100%", width: "100%", objectFit: "fill", borderRadius: "6px",
-            opacity: activePlayer === 1 ? 1 : 0, 
-            transition: "opacity 0.4s ease-in-out",
+            opacity: 1, 
             zIndex: activePlayer === 1 ? 10 : 1
           }}
           playsInline
