@@ -224,12 +224,13 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
             zIndex: activePlayer === 0 ? 10 : 1,
           }}
           playsInline
+          autoPlay
+          muted
           preload="auto"
           onEnded={activePlayer === 0 ? handleVideoEnded : undefined}
           onError={() => { if (activePlayer === 0) handleVideoEnded(); }}
           src={src0}
         />
-        {/* PLAYER 1 */}
         <video
           ref={videoRef1}
           style={{
@@ -240,6 +241,8 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
             zIndex: activePlayer === 1 ? 10 : 1,
           }}
           playsInline
+          autoPlay
+          muted
           preload="auto"
           onEnded={activePlayer === 1 ? handleVideoEnded : undefined}
           onError={() => { if (activePlayer === 1) handleVideoEnded(); }}
