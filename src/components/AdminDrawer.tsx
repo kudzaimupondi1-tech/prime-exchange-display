@@ -393,7 +393,7 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
             </div>
           )}
 
-
+          {tab === "settings" && (
             <div>
               <p style={s.sectionTitle}>Change Password</p>
               <input
