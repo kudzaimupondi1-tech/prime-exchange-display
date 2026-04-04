@@ -98,7 +98,7 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
     }
   }, [showVideo, currentIndex, getActiveRef]);
 
-  // Auto-play: try unmuted first, fallback to muted then unmute after interaction
+  // Auto-play: start muted (browser policy), auto-unmute on first interaction
   useEffect(() => {
     if (showVideo) {
       const el = getActiveRef().current;
@@ -117,38 +117,28 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
           hasRestoredTimeRef.current = true;
         }
 
-        // Try unmuted play first
-        el.muted = false;
+        // Always start muted so autoplay is never blocked
+        el.muted = true;
         el.volume = 1.0;
-        const playPromise = el.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              resetStallTimer();
-            })
-            .catch(() => {
-              // Browser blocked unmuted - play muted then auto-unmute on any interaction
-              el.muted = true;
-              el.play()
-                .then(() => {
-                  resetStallTimer();
-                  // Auto-unmute on first user interaction
-                  const unmute = () => {
-                    el.muted = false;
-                    el.volume = 1.0;
-                    document.removeEventListener("click", unmute);
-                    document.removeEventListener("keydown", unmute);
-                    document.removeEventListener("touchstart", unmute);
-                  };
-                  document.addEventListener("click", unmute, { once: true });
-                  document.addEventListener("keydown", unmute, { once: true });
-                  document.addEventListener("touchstart", unmute, { once: true });
-                })
-                .catch(() => {
-                  startStallDetection();
-                });
-            });
-        }
+        el.play()
+          .then(() => {
+            resetStallTimer();
+          })
+          .catch(() => {
+            startStallDetection();
+          });
+
+        // Auto-unmute on first user interaction
+        const unmute = () => {
+          el.muted = false;
+          el.volume = 1.0;
+          document.removeEventListener("click", unmute);
+          document.removeEventListener("keydown", unmute);
+          document.removeEventListener("touchstart", unmute);
+        };
+        document.addEventListener("click", unmute, { once: true });
+        document.addEventListener("keydown", unmute, { once: true });
+        document.addEventListener("touchstart", unmute, { once: true });
       }
     }
   }, [showVideo, activePlayer]);
