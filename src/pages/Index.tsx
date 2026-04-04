@@ -135,6 +135,7 @@ const Index = () => {
             displayMode={state.displayMode}
             announcementText={state.announcementText}
             playlist={playlist}
+            companyInfo={state.companyInfo || { values: ["Relationships", "Results", "Reach", "Relevance"], vision: "", mission: "" }}
           />
         </div>
       </div>
