@@ -10,7 +10,7 @@ interface Props {
 }
 
 const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
-  const [tab, setTab] = useState<"rates" | "currencies" | "display" | "settings">("rates");
+  const [tab, setTab] = useState<"rates" | "currencies" | "display" | "branding" | "settings">("rates");
   const [editRates, setEditRates] = useState<CurrencyRate[]>(() => state.currencies.map(c => ({ ...c })));
   const [feedback, setFeedback] = useState("");
   const [displayMode, setDisplayMode] = useState<"video" | "announcement">(state.displayMode || "video");
@@ -25,6 +25,10 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
   const [customSell, setCustomSell] = useState("");
   const [countrySearch, setCountrySearch] = useState("");
   const [showCountryPicker, setShowCountryPicker] = useState(false);
+  const info = state.companyInfo || { values: ["Relationships", "Results", "Reach", "Relevance"], vision: "", mission: "" };
+  const [valuesText, setValuesText] = useState(info.values.join("\n"));
+  const [visionText, setVisionText] = useState(info.vision);
+  const [missionText, setMissionText] = useState(info.mission);
 
   const flash = (msg: string) => {
     setFeedback(msg);
