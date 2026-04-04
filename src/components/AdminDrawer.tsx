@@ -10,7 +10,7 @@ interface Props {
 }
 
 const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
-  const [tab, setTab] = useState<"rates" | "currencies" | "display" | "settings">("rates");
+  const [tab, setTab] = useState<"rates" | "currencies" | "display" | "branding" | "settings">("rates");
   const [editRates, setEditRates] = useState<CurrencyRate[]>(() => state.currencies.map(c => ({ ...c })));
   const [feedback, setFeedback] = useState("");
   const [displayMode, setDisplayMode] = useState<"video" | "announcement">(state.displayMode || "video");
@@ -25,6 +25,10 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
   const [customSell, setCustomSell] = useState("");
   const [countrySearch, setCountrySearch] = useState("");
   const [showCountryPicker, setShowCountryPicker] = useState(false);
+  const info = state.companyInfo || { values: ["Relationships", "Results", "Reach", "Relevance"], vision: "", mission: "" };
+  const [valuesText, setValuesText] = useState(info.values.join("\n"));
+  const [visionText, setVisionText] = useState(info.vision);
+  const [missionText, setMissionText] = useState(info.mission);
 
   const flash = (msg: string) => {
     setFeedback(msg);
@@ -119,7 +123,7 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
 
         {/* Tabs */}
         <div style={s.tabBar}>
-          {(["rates", "currencies", "display", "settings"] as const).map(t => (
+          {(["rates", "currencies", "display", "branding", "settings"] as const).map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -337,6 +341,55 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
                 </>
               )}
               <button onClick={saveDisplay} style={s.primaryBtn}>SAVE DISPLAY SETTINGS</button>
+            </div>
+          )}
+
+          {tab === "branding" && (
+            <div>
+              <p style={s.sectionTitle}>Company Name</p>
+              <input
+                value={companyInput}
+                onChange={e => setCompanyInput(e.target.value)}
+                placeholder="Company Name"
+                style={{ ...s.input, width: "100%", marginBottom: "8px" }}
+              />
+              <button onClick={saveCompany} style={{ ...s.primaryBtn, marginBottom: "20px" }}>SAVE COMPANY NAME</button>
+
+              <p style={s.sectionTitle}>Our Values (one per line)</p>
+              <textarea
+                value={valuesText}
+                onChange={e => setValuesText(e.target.value)}
+                placeholder={"Relationships\nResults\nReach\nRelevance"}
+                style={{ ...s.input, width: "100%", height: "100px", resize: "vertical", marginBottom: "8px", fontFamily: "Inter, sans-serif" }}
+              />
+
+              <p style={s.sectionTitle}>Our Vision</p>
+              <textarea
+                value={visionText}
+                onChange={e => setVisionText(e.target.value)}
+                placeholder="Enter vision statement..."
+                style={{ ...s.input, width: "100%", height: "80px", resize: "vertical", marginBottom: "8px", fontFamily: "Inter, sans-serif" }}
+              />
+
+              <p style={s.sectionTitle}>Our Mission</p>
+              <textarea
+                value={missionText}
+                onChange={e => setMissionText(e.target.value)}
+                placeholder="Enter mission statement..."
+                style={{ ...s.input, width: "100%", height: "80px", resize: "vertical", marginBottom: "8px", fontFamily: "Inter, sans-serif" }}
+              />
+
+              <button onClick={() => {
+                onUpdate({
+                  ...state,
+                  companyInfo: {
+                    values: valuesText.split("\n").map(v => v.trim()).filter(Boolean),
+                    vision: visionText.trim(),
+                    mission: missionText.trim(),
+                  }
+                });
+                flash("Branding saved!");
+              }} style={s.primaryBtn}>SAVE BRANDING</button>
             </div>
           )}
 
