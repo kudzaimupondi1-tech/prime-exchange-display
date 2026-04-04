@@ -123,7 +123,7 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
 
         {/* Tabs */}
         <div style={s.tabBar}>
-          {(["rates", "currencies", "display", "settings"] as const).map(t => (
+          {(["rates", "currencies", "display", "branding", "settings"] as const).map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
