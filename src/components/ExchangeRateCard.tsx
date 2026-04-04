@@ -6,14 +6,6 @@ interface Props {
   companyName: string;
 }
 
-const CURRENCY_SYMBOLS: Record<string, string> = {
-  USD: "$", EUR: "€", GBP: "£", AED: "د.إ", JPY: "¥", CHF: "Fr",
-  CAD: "C$", AUD: "A$", NZD: "NZ$", CNY: "¥", INR: "₹", SAR: "﷼",
-  ZAR: "R", BWP: "P", KES: "KSh", NGN: "₦", GHS: "₵", BRL: "R$",
-  MXN: "$", TRY: "₺", RUB: "₽", THB: "฿", SGD: "S$", MYR: "RM",
-  KRW: "₩", PKR: "₨", PHP: "₱", IDR: "Rp", ILS: "₪",
-};
-
 const ExchangeRateCard = ({ rates, companyName }: Props) => {
   const displayed = rates.slice(0, 8);
 
@@ -34,7 +26,7 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "38% 1fr 1fr",
+          gridTemplateColumns: "35% 1fr 1fr",
           background: "#0132B0",
           borderBottom: "2px solid rgba(255,255,255,0.2)",
         }}
@@ -42,41 +34,41 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
         <span
           style={{
             fontFamily: "Montserrat, Arial, sans-serif",
-            fontWeight: 800,
-            fontSize: "clamp(1.4rem, 2.4vw, 3.5rem)",
+            fontWeight: 500,
+            fontSize: "clamp(1.2rem, 2vw, 2.8rem)",
             color: "#FFFFFF",
             padding: "16px 20px",
-            textAlign: "left",
-            letterSpacing: "1px",
-          }}
-        >
-          CURRENCY
-        </span>
-        <span
-          style={{
-            fontFamily: "Montserrat, Arial, sans-serif",
-            fontWeight: 800,
-            fontSize: "clamp(1.4rem, 2.4vw, 3.5rem)",
-            color: "#ffffffff",
-            padding: "16px",
             textAlign: "center",
             letterSpacing: "1px",
           }}
         >
-          WE BUY
+          Currency
         </span>
         <span
           style={{
             fontFamily: "Montserrat, Arial, sans-serif",
             fontWeight: 800,
-            fontSize: "clamp(1.4rem, 2.4vw, 3.5rem)",
+            fontSize: "clamp(1.2rem, 2vw, 2.8rem)",
             color: "#FFFFFF",
             padding: "16px",
             textAlign: "center",
             letterSpacing: "1px",
           }}
         >
-          WE SELL
+          We Buy
+        </span>
+        <span
+          style={{
+            fontFamily: "Montserrat, Arial, sans-serif",
+            fontWeight: 800,
+            fontSize: "clamp(1.2rem, 2vw, 2.8rem)",
+            color: "#FFFFFF",
+            padding: "16px",
+            textAlign: "center",
+            letterSpacing: "1px",
+          }}
+        >
+          We Sell
         </span>
       </div>
 
@@ -87,7 +79,7 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
             key={rate.code}
             style={{
               display: "grid",
-              gridTemplateColumns: "38% 1fr 1fr",
+              gridTemplateColumns: "35% 1fr 1fr",
               alignItems: "center",
               flex: 1,
               background: index % 2 === 0 ? "#FFFFFF" : "#F4F7F9",
@@ -99,25 +91,25 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
               style={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "flex-start",
-                gap: "16px",
+                justifyContent: "center",
+                gap: "12px",
                 height: "100%",
-                padding: "0 20px",
+                padding: "0 12px",
                 background: "#0132B0",
-                borderRight: "1px solid rgba(0,0,0,0.05)",
               }}
             >
               {/* FLAG */}
               <div
                 style={{
-                  width: "clamp(48px, 4vw, 64px)",
-                  borderRadius: "4px",
+                  width: "clamp(36px, 3.5vw, 56px)",
+                  height: "clamp(36px, 3.5vw, 56px)",
+                  borderRadius: "50%",
                   overflow: "hidden",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   flexShrink: 0,
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  background: "#E0E0E0",
                 }}
               >
                 <FlagImage countryCode={rate.countryCode} flag={rate.flag} rateCode={rate.code} />
@@ -126,11 +118,12 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
               {/* CURRENCY CODE */}
               <span
                 style={{
-                  fontFamily: "'Arial Rounded MT Bold', Arial, sans-serif",
-                  fontSize: "clamp(1.8rem, 2.4vw, 3.2rem)",
-                  fontWeight: 700,
-                  color: "#ffffffff",
+                  fontFamily: "Montserrat, Arial, sans-serif",
+                  fontSize: "clamp(1.4rem, 2vw, 2.6rem)",
+                  fontWeight: 500,
+                  color: "#FFFFFF",
                   letterSpacing: "1px",
+                  whiteSpace: "nowrap",
                 }}
               >
                 {rate.code}
@@ -146,14 +139,16 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
                 alignItems: "center",
                 justifyContent: "center",
                 borderRight: "1px solid rgba(0,0,0,0.05)",
+                borderLeft: "1px solid rgba(0,0,0,0.05)",
               }}
             >
               <span
                 style={{
-                  fontFamily: "'Arial Rounded MT Bold', Arial, sans-serif",
-                  fontSize: "clamp(1.8rem, 2.4vw, 3.2rem)",
+                  fontFamily: "'Arial Rounded MT Bold', Roboto, Arial, sans-serif",
+                  fontSize: "clamp(1.6rem, 2.4vw, 3.2rem)",
                   fontWeight: 800,
-                  color: "#2c7e25ff", // professional green
+                  color: "#1B3A6F",
+                  whiteSpace: "nowrap",
                 }}
               >
                 {formatWithSpaces(rate.buy)}
@@ -172,10 +167,11 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
             >
               <span
                 style={{
-                  fontFamily: "'Arial Rounded MT Bold', Arial, sans-serif",
-                  fontSize: "clamp(1.5rem, 2.6vw, 4.2rem)",
-                  fontWeight: 900,
-                  color: rate.sell ? "#ff0000ff" : "#94A3B8", // professional red / empty grey
+                  fontFamily: "'Arial Rounded MT Bold', Roboto, Arial, sans-serif",
+                  fontSize: "clamp(1.6rem, 2.4vw, 3.2rem)",
+                  fontWeight: 800,
+                  color: rate.sell ? "#D32F2F" : "#94A3B8",
+                  whiteSpace: "nowrap",
                 }}
               >
                 {rate.sell ? formatWithSpaces(rate.sell) : "—"}
@@ -203,9 +199,9 @@ const FlagImage = ({ countryCode, flag, rateCode }: { countryCode: string; flag:
   }
   return (
     <img
-      src={`https://flagcdn.com/w40/${actualCode.toLowerCase()}.png`}
+      src={`https://flagcdn.com/w80/${actualCode.toLowerCase()}.png`}
       alt={actualCode}
-      style={{ width: "clamp(40px, 4vw, 80px)", height: "auto", objectFit: "cover" }}
+      style={{ width: "100%", height: "100%", objectFit: "cover" }}
       onError={() => setError(true)}
     />
   );
