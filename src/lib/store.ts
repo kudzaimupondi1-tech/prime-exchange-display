@@ -9,6 +9,12 @@ export interface CurrencyRate {
   sell: string;
 }
 
+export interface CompanyInfo {
+  values: string[];
+  vision: string;
+  mission: string;
+}
+
 export interface AppState {
   currencies: CurrencyRate[];
   lastUpdated: string;
@@ -16,6 +22,7 @@ export interface AppState {
   companyName: string;
   displayMode: "video" | "announcement";
   announcementText: string;
+  companyInfo: CompanyInfo;
 }
 
 export const DEFAULT_STATE: AppState = {
