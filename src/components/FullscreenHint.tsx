@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 
 const FullscreenHint = () => {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
 
   const goFullscreen = useCallback(() => {
     document.documentElement.requestFullscreen?.().catch(() => {});
@@ -9,22 +9,32 @@ const FullscreenHint = () => {
   }, []);
 
   useEffect(() => {
-    const handleClick = () => goFullscreen();
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "F11") e.preventDefault();
-      goFullscreen();
-    };
+    // Try fullscreen immediately (works in kiosk/some TV browsers)
+    document.documentElement.requestFullscreen?.().then(() => {
+      setVisible(false);
+    }).catch(() => {
+      // Browser blocked it — show hint and wait for first interaction
+      setVisible(true);
 
-    window.addEventListener("click", handleClick, { once: true });
-    window.addEventListener("keydown", handleKey, { once: true });
+      const handleInteraction = () => {
+        goFullscreen();
+        window.removeEventListener("click", handleInteraction);
+        window.removeEventListener("keydown", handleInteraction);
+        window.removeEventListener("touchstart", handleInteraction);
+      };
 
-    const timer = setTimeout(() => setVisible(false), 4500);
+      window.addEventListener("click", handleInteraction, { once: true });
+      window.addEventListener("keydown", handleInteraction, { once: true });
+      window.addEventListener("touchstart", handleInteraction, { once: true });
 
-    return () => {
-      window.removeEventListener("click", handleClick);
-      window.removeEventListener("keydown", handleKey);
-      clearTimeout(timer);
-    };
+      const timer = setTimeout(() => setVisible(false), 4500);
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener("click", handleInteraction);
+        window.removeEventListener("keydown", handleInteraction);
+        window.removeEventListener("touchstart", handleInteraction);
+      };
+    });
   }, [goFullscreen]);
 
   if (!visible) return null;
@@ -43,25 +53,10 @@ const FullscreenHint = () => {
         animation: "fade-hint 4.5s ease-in-out forwards",
       }}
     >
-      <p
-        style={{
-          fontFamily: "Montserrat, Arial, sans-serif",
-          fontSize: "clamp(1.2rem, 2.5vw, 2rem)",
-          fontWeight: 700,
-          color: "#FFFFFF",
-          marginBottom: "12px",
-          letterSpacing: "2px",
-        }}
-      >
+      <p style={{ fontFamily: "Montserrat, Arial, sans-serif", fontSize: "clamp(1.2rem, 2.5vw, 2rem)", fontWeight: 700, color: "#FFFFFF", marginBottom: "12px", letterSpacing: "2px" }}>
         Click or press any key to go fullscreen
       </p>
-      <p
-        style={{
-          fontFamily: "Inter, Arial, sans-serif",
-          fontSize: "clamp(0.7rem, 1vw, 0.9rem)",
-          color: "rgba(255,255,255,0.5)",
-        }}
-      >
+      <p style={{ fontFamily: "Inter, Arial, sans-serif", fontSize: "clamp(0.7rem, 1vw, 0.9rem)", color: "rgba(255,255,255,0.5)" }}>
         TV remote · Keyboard · Mouse click
       </p>
     </div>
