@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { loadState, saveState, fetchVideoUrls, AppState } from "@/lib/store";
+import { supabase } from "@/lib/supabase";
 import ExchangeRateCard from "@/components/ExchangeRateCard";
 import VideoPanelNew from "@/components/VideoPanelNew";
 import TickerBar from "@/components/TickerBar";
@@ -21,12 +22,38 @@ const Index = () => {
     };
     init();
 
+    // Listen to real-time changes
+    const channel = supabase
+      .channel('public:app_state')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'app_state',
+        },
+        (payload) => {
+          const newData = payload.new as any;
+          if (newData && newData.state) {
+             console.log('Real-time update received');
+             if (Array.isArray(newData.state.currencies)) {
+               setState(newData.state as AppState);
+             }
+          }
+        }
+      )
+      .subscribe();
+
     // Auto-refresh the playlist every hour just in case new videos are dropped into the bucket
     const iv = setInterval(async () => {
       const vp = await fetchVideoUrls();
       if (vp.length > 0) setPlaylist(vp);
     }, 3600000);
-    return () => clearInterval(iv);
+    
+    return () => {
+      clearInterval(iv);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const handleUpdate = useCallback((newState: AppState) => {
