@@ -91,7 +91,7 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
               alignItems: "center",
               flex: 1,
               background: index % 2 === 0 ? "#FFFFFF" : "#F4F7F9",
-              borderBottom: "1px solid #CBD5E1", // slightly darker row line
+              borderBottom: "1px solid #E2E8F0",
             }}
           >
             {/* CURRENCY COLUMN */}
@@ -103,7 +103,7 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
                 gap: "16px",
                 height: "100%",
                 padding: "0 20px",
-                borderRight: "1px solid #CBD5E1", // slightly darker column line
+                borderRight: "1px solid rgba(0,0,0,0.05)",
               }}
             >
               {/* FLAG */}
@@ -144,7 +144,7 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                borderRight: "1px solid #CBD5E1", // slightly darker column line
+                borderRight: "1px solid rgba(0,0,0,0.05)",
               }}
             >
               <span
@@ -152,7 +152,7 @@ const ExchangeRateCard = ({ rates, companyName }: Props) => {
                   fontFamily: "'Arial Rounded MT Bold', Arial, sans-serif",
                   fontSize: "clamp(1.5rem, 2.6vw, 4.2rem)",
                   fontWeight: 900,
-                  color: "#059669", // professional green
+                  color: "#00893eff", // professional green
                 }}
               >
                 {formatWithSpaces(rate.buy)}
@@ -196,7 +196,7 @@ const codeMap: Record<string, string> = {
 const FlagImage = ({ countryCode, flag, rateCode }: { countryCode: string; flag: string; rateCode?: string }) => {
   const [error, setError] = useState(false);
   const actualCode = (rateCode ? codeMap[rateCode.toUpperCase()] : null) || countryCode;
-  
+
   if (error || !actualCode) {
     return <span style={{ fontSize: "20px", lineHeight: 1 }}>{flag}</span>;
   }
