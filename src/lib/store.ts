@@ -37,6 +37,11 @@ export const DEFAULT_STATE: AppState = {
   companyName: "AFC BANK",
   displayMode: "video",
   announcementText: "Welcome to our exchange!",
+  companyInfo: {
+    values: ["Relationships", "Results", "Reach", "Relevance"],
+    vision: "To become a strong valuable bank that builds relationships, transforms lives through productive communities, ecosystems and value chains",
+    mission: "To transform how people produce, transact and grow wealth through upright and accessible banking.",
+  },
 };
 
 export async function loadState(): Promise<AppState> {
