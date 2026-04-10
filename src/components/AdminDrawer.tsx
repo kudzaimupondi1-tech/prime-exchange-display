@@ -44,8 +44,8 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
     flash("Rates saved!");
   };
 
-  const removeCurrency = (code: string) => {
-    const next = editRates.filter(r => r.code !== code);
+  const removeCurrency = (code: string, against: string) => {
+    const next = editRates.filter(r => !(r.code === code && (r.against || "ZWG") === against));
     setEditRates(next);
     onUpdate({ ...state, currencies: next });
     flash(`${code} removed`);
@@ -53,7 +53,7 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
 
   const addPreset = (preset: typeof PRESET_CURRENCIES[0]) => {
     if (!presetAgainst) { flash("Select against currency first"); return; }
-    if (editRates.find(r => r.code === preset.code)) { flash(`${preset.code} already added`); return; }
+    if (editRates.find(r => r.code === preset.code && (r.against || "ZWG") === presetAgainst)) { flash(`${preset.code} already added against ${presetAgainst}`); return; }
     const newRate: CurrencyRate = { ...preset, buy: "", sell: "", against: presetAgainst };
     const next = [...editRates, newRate];
     setEditRates(next);
@@ -71,7 +71,7 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
     if (!customCode) { flash("Code required"); return; }
     if (!customCountry) { flash("Please select a country flag"); return; }
     if (!customAgainst) { flash("Please select against currency"); return; }
-    if (editRates.find(r => r.code === customCode.toUpperCase())) { flash("Already exists"); return; }
+    if (editRates.find(r => r.code === customCode.toUpperCase() && (r.against || "ZWG") === customAgainst.toUpperCase())) { flash("Already exists against this currency"); return; }
     const country = ALL_COUNTRIES.find(c => c.code === customCountry);
     const newRate: CurrencyRate = {
       code: customCode.toUpperCase(),
@@ -108,7 +108,9 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
   };
 
   const s = styles;
-  const availablePresets = PRESET_CURRENCIES.filter(p => !editRates.find(r => r.code === p.code));
+  const availablePresets = presetAgainst 
+    ? PRESET_CURRENCIES.filter(p => !editRates.find(r => r.code === p.code && (r.against || "ZWG") === presetAgainst))
+    : PRESET_CURRENCIES;
   const selectedCountry = ALL_COUNTRIES.find(c => c.code === customCountry);
   const filteredCountries = ALL_COUNTRIES.filter(c =>
     c.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
@@ -187,7 +189,7 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
               </div>
 
               {editRates.map((r, i) => (
-                <div key={r.code} style={s.rateRow}>
+                <div key={`${r.code}-${r.against || "ZWG"}`} style={s.rateRow}>
                   <span style={s.rateLabel} title={r.name}>{r.flag} {r.code}</span>
                   <select
                     value={r.against || "ZWG"}
@@ -248,123 +250,13 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
             <div>
               <p style={s.sectionTitle}>Active Currencies</p>
               {editRates.map(r => (
-                <div key={r.code} style={s.currRow}>
-                  <span style={s.rateLabel}>{r.flag} {r.code} — {r.name}</span>
-                  <button onClick={() => removeCurrency(r.code)} style={s.removeBtn}>Remove</button>
+                <div key={`${r.code}-${r.against || "ZWG"}`} style={s.currRow}>
+                  <span style={s.rateLabel}>{r.flag} {r.code} (vs {r.against || "ZWG"}) — {r.name}</span>
+                  <button onClick={() => removeCurrency(r.code, r.against || "ZWG")} style={s.removeBtn}>Remove</button>
                 </div>
               ))}
 
-              <p style={{ ...s.sectionTitle, marginTop: "20px" }}>Add Custom Currency</p>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "8px" }}>
-                <input value={customCode} onChange={e => setCustomCode(e.target.value)} placeholder="Code" style={s.input} maxLength={8} />
-                <select value={customAgainst} onChange={e => setCustomAgainst(e.target.value)} style={s.input}>
-                  <option value="" disabled>Select vs...</option>
-                  <option value="ZWG">vs ZWG</option>
-                  <option value="USD">vs USD</option>
-                  <option value="ZAR">vs ZAR</option>
-                </select>
-                
-                {/* Country/Flag Picker */}
-                <div style={{ position: "relative" }}>
-                  <button
-                    onClick={() => setShowCountryPicker(!showCountryPicker)}
-                    style={{
-                      ...s.input,
-                      width: "100%",
-                      textAlign: "left",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    }}
-                  >
-                    {selectedCountry ? (
-                      <>{selectedCountry.flag} {selectedCountry.name}</>
-                    ) : (
-                      <span style={{ color: "rgba(255,255,255,0.4)" }}>Select Flag 🏳️</span>
-                    )}
-                  </button>
-                  
-                  {showCountryPicker && (
-                    <div style={{
-                      position: "absolute",
-                      top: "100%",
-                      left: 0,
-                      right: 0,
-                      zIndex: 100,
-                      background: "#0d1b2a",
-                      border: "1px solid rgba(212,175,55,0.3)",
-                      borderRadius: "6px",
-                      maxHeight: "250px",
-                      overflow: "hidden",
-                      display: "flex",
-                      flexDirection: "column",
-                    }}>
-                      <input
-                        value={countrySearch}
-                        onChange={e => setCountrySearch(e.target.value)}
-                        placeholder="Search country..."
-                        style={{ ...s.input, borderRadius: 0, borderBottom: "1px solid rgba(255,255,255,0.1)" }}
-                        autoFocus
-                      />
-                      <div style={{ overflowY: "auto", maxHeight: "200px" }}>
-                        {filteredCountries.map(c => (
-                          <button
-                            key={c.code}
-                            onClick={() => selectCountry(c)}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                              width: "100%",
-                              padding: "8px 10px",
-                              background: "none",
-                              border: "none",
-                              borderBottom: "1px solid rgba(255,255,255,0.05)",
-                              color: "#fff",
-                              fontSize: "12px",
-                              cursor: "pointer",
-                              textAlign: "left",
-                              fontFamily: "Inter, sans-serif",
-                            }}
-                          >
-                            <span style={{ fontSize: "16px" }}>{c.flag}</span>
-                            <span>{c.name}</span>
-                            <span style={{ color: "rgba(255,255,255,0.3)", marginLeft: "auto", fontSize: "10px" }}>{c.code.toUpperCase()}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
 
-                <input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="Currency Name" style={{ ...s.input, gridColumn: "1/4" }} />
-                <input 
-                  inputMode="decimal"
-                  value={customBuy} 
-                  onKeyPress={(e) => { if (!/[0-9.]/.test(e.key)) e.preventDefault(); }}
-                  onChange={e => {
-                    let val = e.target.value.replace(/[^0-9.]/g, '');
-                    if ((val.match(/\./g) || []).length > 1) val = val.substring(0, val.lastIndexOf('.'));
-                    setCustomBuy(val);
-                  }} 
-                  placeholder="Buy rate" 
-                  style={s.input} 
-                />
-                <input 
-                  inputMode="decimal"
-                  value={customSell} 
-                  onKeyPress={(e) => { if (!/[0-9.]/.test(e.key)) e.preventDefault(); }}
-                  onChange={e => {
-                    let val = e.target.value.replace(/[^0-9.]/g, '');
-                    if ((val.match(/\./g) || []).length > 1) val = val.substring(0, val.lastIndexOf('.'));
-                    setCustomSell(val);
-                  }} 
-                  placeholder="Sell rate" 
-                  style={s.input} 
-                />
-              </div>
-              <button onClick={addCustom} style={s.primaryBtn}>ADD CURRENCY</button>
 
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "20px", marginBottom: "10px" }}>
                 <p style={{ ...s.sectionTitle, marginTop: 0, marginBottom: 0 }}>Preset Currencies ({availablePresets.length})</p>

@@ -112,7 +112,7 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
             alignItems: "center",
             whiteSpace: "nowrap",
             width: "max-content",
-            animationDuration: "360s",
+            animationDuration: `${Math.max(10, rates.length) * 8}s`,
           }}
         >
           {entries.map((r, i) => (
@@ -145,7 +145,7 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
 
               {/* Buy value */}
               <span style={{
-                 fontFamily: "'Arial Rounded MT Bold', Arial, sans-serif",
+                 fontFamily: '"Arial Rounded MT Bold", sans-serif',
                 fontSize: "clamp(2rem, 3.6vw, 5rem)",
                 fontWeight: 700,
                 color: "#d4af37",
@@ -165,7 +165,7 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
 
               {/* Sell value */}
               <span style={{
-                 fontFamily: "'Arial Rounded MT Bold', Arial, sans-serif",
+                 fontFamily: '"Arial Rounded MT Bold", sans-serif',
                 fontSize: "clamp(2rem, 3.6vw, 5rem)",
                 fontWeight: 700,
                 color: "#ff6b6b",

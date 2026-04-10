@@ -6,6 +6,7 @@ export interface PresetCurrency {
 }
 
 export const PRESET_CURRENCIES: PresetCurrency[] = [
+  { code: "ZWG", name: "ZIMBABWE GOLD", flag: "🇿🇼", countryCode: "zw" },
   { code: "USD", name: "US DOLLAR", flag: "🇺🇸", countryCode: "us" },
   { code: "EUR", name: "EURO", flag: "🇪🇺", countryCode: "eu" },
   { code: "GBP", name: "POUND STERLING", flag: "🇬🇧", countryCode: "gb" },

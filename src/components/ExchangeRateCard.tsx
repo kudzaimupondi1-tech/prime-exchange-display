@@ -7,11 +7,12 @@ interface Props {
 }
 
 const ExchangeRateCard = ({ rates }: Props) => {
-  const EXACT_GROUPS = ["ZWG", "USD"];
+  const EXACT_GROUPS = ["ZWG", "USD", "ZAR"];
 
   const groupedRates: Record<string, CurrencyRate[]> = {
     "ZWG": [],
     "USD": [],
+    "ZAR": [],
   };
   rates.forEach(rate => {
     const against = (rate.against || "ZWG").toUpperCase();
@@ -23,6 +24,9 @@ const ExchangeRateCard = ({ rates }: Props) => {
   const getDisplayRows = (groupRates: CurrencyRate[]) => {
     return groupRates.slice(0, 5);
   };
+
+  const maxRows = Math.max(1, ...EXACT_GROUPS.map(g => getDisplayRows(groupedRates[g]).length));
+  const scale = Math.min(3, 5 / maxRows);
 
   return (
     <div
@@ -48,13 +52,13 @@ const ExchangeRateCard = ({ rates }: Props) => {
               padding: "4px 8px",
               fontFamily: "Montserrat, Arial, sans-serif",
               fontWeight: 800,
-              fontSize: "clamp(0.7rem, 1.4vw, 2.0rem)",
+              fontSize: `clamp(0.8rem, ${1.8 * scale}vh, ${2.5 * scale}rem)`,
               borderTop: groupIndex > 0 ? "1px solid #008000" : "none",
               borderBottom: "1px solid #008000",
               flex: "0 0 auto",
             }}
           >
-            Foreign Exchange Cross Rates against the {group}
+            Exchange Rates Against {group}
           </div>
 
           {/* BLUE SUB-HEADER */}
@@ -71,7 +75,7 @@ const ExchangeRateCard = ({ rates }: Props) => {
               style={{
                 fontFamily: "Montserrat, Arial, sans-serif",
                 fontWeight: 700,
-                fontSize: "clamp(0.7rem, 1.2vw, 1.8rem)",
+                fontSize: `clamp(0.8rem, ${1.5 * scale}vh, ${2.2 * scale}rem)`,
                 color: "#FFFFFF",
                 padding: "6px 12px",
                 textAlign: "center",
@@ -84,7 +88,7 @@ const ExchangeRateCard = ({ rates }: Props) => {
               style={{
                 fontFamily: "Montserrat, Arial, sans-serif",
                 fontWeight: 800,
-                fontSize: "clamp(0.7rem, 1.2vw, 1.8rem)",
+                fontSize: `clamp(0.8rem, ${1.5 * scale}vh, ${2.2 * scale}rem)`,
                 color: "#FFFFFF",
                 padding: "6px",
                 textAlign: "center",
@@ -97,7 +101,7 @@ const ExchangeRateCard = ({ rates }: Props) => {
               style={{
                 fontFamily: "Montserrat, Arial, sans-serif",
                 fontWeight: 800,
-                fontSize: "clamp(0.7rem, 1.2vw, 1.8rem)",
+                fontSize: `clamp(0.8rem, ${1.5 * scale}vh, ${2.2 * scale}rem)`,
                 color: "#FFFFFF",
                 padding: "6px",
                 textAlign: "center",
@@ -136,8 +140,8 @@ const ExchangeRateCard = ({ rates }: Props) => {
                   {/* FLAG */}
                   <div
                     style={{
-                      width: "clamp(22px, 2.5vw, 36px)",
-                      height: "clamp(22px, 2.5vw, 36px)",
+                      width: `clamp(24px, ${3 * scale}vh, ${40 * scale}px)`,
+                      height: `clamp(24px, ${3 * scale}vh, ${40 * scale}px)`,
                       borderRadius: "50%",
                       overflow: "hidden",
                       display: "flex",
@@ -153,7 +157,7 @@ const ExchangeRateCard = ({ rates }: Props) => {
                   <span
                     style={{
                       fontFamily: "Montserrat, Arial, sans-serif",
-                      fontSize: "clamp(0.9rem, 1.6vw, 2.4rem)",
+                      fontSize: `clamp(1.1rem, ${2.4 * scale}vh, ${3.2 * scale}rem)`,
                       fontWeight: 700,
                       color: "#FFFFFF",
                       whiteSpace: "nowrap",
@@ -174,8 +178,8 @@ const ExchangeRateCard = ({ rates }: Props) => {
                 >
                   <span
                     style={{
-                      fontFamily: "'Arial Rounded MT Bold', Roboto, Arial, sans-serif",
-                      fontSize: "clamp(1.1rem, 1.8vw, 2.8rem)",
+                      fontFamily: '"Arial Rounded MT Bold", sans-serif',
+                      fontSize: `clamp(1.3rem, ${2.8 * scale}vh, ${3.8 * scale}rem)`,
                       fontWeight: 800,
                       color: "#000000",
                       whiteSpace: "nowrap",
@@ -195,8 +199,8 @@ const ExchangeRateCard = ({ rates }: Props) => {
                 >
                   <span
                     style={{
-                      fontFamily: "'Arial Rounded MT Bold', Roboto, Arial, sans-serif",
-                      fontSize: "clamp(1.1rem, 1.8vw, 2.8rem)",
+                      fontFamily: '"Arial Rounded MT Bold", sans-serif',
+                      fontSize: `clamp(1.3rem, ${2.8 * scale}vh, ${3.8 * scale}rem)`,
                       fontWeight: 800,
                       color: "#e60000",
                       whiteSpace: "nowrap",

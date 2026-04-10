@@ -131,18 +131,21 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
           hasRestoredTimeRef.current = true;
         }
 
-        // Always start muted so autoplay is never blocked
-        el.muted = true;
+        // Try playing without muting first
+        el.muted = isMuted;
         el.volume = 1.0;
         el.play()
           .then(() => {
             resetStallTimer();
           })
           .catch(() => {
-            startStallDetection();
+            // Autoplay blocked without mute, fallback to muted
+            el.muted = true;
+            setIsMuted(true);
+            el.play().then(() => resetStallTimer()).catch(() => startStallDetection());
           });
 
-        // Auto-unmute on first user interaction
+        // Auto-unmute on first user interaction if currently muted
         const unmute = () => {
           setIsMuted(false);
           el.muted = false;
