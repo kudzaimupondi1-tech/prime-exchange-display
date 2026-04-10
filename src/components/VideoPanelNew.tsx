@@ -32,6 +32,7 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
   const [src1, setSrc1] = useState(activePlaylist[1 % activePlaylist.length]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showFallbackCard, setShowFallbackCard] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
 
   const stallTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const videoPlayingRef = useRef(false);
@@ -143,6 +144,7 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
 
         // Auto-unmute on first user interaction
         const unmute = () => {
+          setIsMuted(false);
           el.muted = false;
           el.volume = 1.0;
           document.removeEventListener("click", unmute);
@@ -195,11 +197,12 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
       setActivePlayer(1);
       if (videoRef1.current) {
         videoRef1.current.currentTime = 0;
-        videoRef1.current.muted = false;
+        videoRef1.current.muted = isMuted;
         videoRef1.current.volume = 1.0;
         videoRef1.current.play().catch(() => {
           if (videoRef1.current) {
             videoRef1.current.muted = true;
+            setIsMuted(true);
             videoRef1.current.play().catch(console.error);
           }
         });
@@ -209,11 +212,12 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
       setActivePlayer(0);
       if (videoRef0.current) {
         videoRef0.current.currentTime = 0;
-        videoRef0.current.muted = false;
+        videoRef0.current.muted = isMuted;
         videoRef0.current.volume = 1.0;
         videoRef0.current.play().catch(() => {
           if (videoRef0.current) {
             videoRef0.current.muted = true;
+            setIsMuted(true);
             videoRef0.current.play().catch(console.error);
           }
         });
@@ -236,8 +240,7 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
             zIndex: activePlayer === 0 ? 10 : 1
           }}
           playsInline
-          autoPlay
-          muted
+          muted={isMuted}
           preload="auto"
           onEnded={activePlayer === 0 ? handleVideoEnded : undefined}
           onError={() => { if (activePlayer === 0) handleVideoEnded(); }}
@@ -252,8 +255,7 @@ const VideoPanelNew = ({ companyName, displayMode = "video", announcementText = 
             zIndex: activePlayer === 1 ? 10 : 1
           }}
           playsInline
-          autoPlay
-          muted
+          muted={isMuted}
           preload="auto"
           onEnded={activePlayer === 1 ? handleVideoEnded : undefined}
           onError={() => { if (activePlayer === 1) handleVideoEnded(); }}

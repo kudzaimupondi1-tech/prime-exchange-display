@@ -7,6 +7,7 @@ export interface CurrencyRate {
   countryCode: string;
   buy: string;
   sell: string;
+  against?: string;
 }
 
 export interface CompanyInfo {
@@ -27,10 +28,10 @@ export interface AppState {
 
 export const DEFAULT_STATE: AppState = {
   currencies: [
-    { code: "USD", name: "US DOLLAR", flag: "🇺🇸", countryCode: "us", buy: "6149", sell: "9988" },
-    { code: "EUR", name: "EURO", flag: "🇪🇺", countryCode: "eu", buy: "8565", sell: "" },
-    { code: "AED", name: "UAE DIRHAM", flag: "🇦🇪", countryCode: "ae", buy: "7654", sell: "" },
-    { code: "GBP", name: "POUND STERLING", flag: "🇬🇧", countryCode: "gb", buy: "1119", sell: "13195" },
+    { code: "USD", name: "US DOLLAR", flag: "🇺🇸", countryCode: "us", buy: "6149", sell: "9988", against: "ZWG" },
+    { code: "EUR", name: "EURO", flag: "🇪🇺", countryCode: "eu", buy: "8565", sell: "", against: "ZWG" },
+    { code: "AED", name: "UAE DIRHAM", flag: "🇦🇪", countryCode: "ae", buy: "7654", sell: "", against: "ZWG" },
+    { code: "GBP", name: "POUND STERLING", flag: "🇬🇧", countryCode: "gb", buy: "1119", sell: "13195", against: "ZWG" },
   ],
   lastUpdated: new Date().toISOString(),
   adminPassword: "admin123",

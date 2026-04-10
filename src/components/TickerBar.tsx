@@ -112,7 +112,7 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
             alignItems: "center",
             whiteSpace: "nowrap",
             width: "max-content",
-            animationDuration: "90s",
+            animationDuration: "360s",
           }}
         >
           {entries.map((r, i) => (
@@ -130,7 +130,7 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
                 color: "#ffffff",
                 letterSpacing: "1px",
               }}>
-                {r.code}
+                {r.code.includes("/") ? r.code : `${r.code}/${(r.against || "ZWG").toUpperCase()}`}
               </span>
 
               {/* BUY label */}

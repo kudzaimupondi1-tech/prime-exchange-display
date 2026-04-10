@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AppState, CurrencyRate } from "@/lib/store";
 import { PRESET_CURRENCIES } from "@/lib/currencies";
 import { ALL_COUNTRIES, Country } from "@/lib/countries";
+import { parseTreasuryPdf } from "@/lib/pdfParser";
 
 interface Props {
   state: AppState;
@@ -23,6 +24,8 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
   const [customCountry, setCustomCountry] = useState("");
   const [customBuy, setCustomBuy] = useState("");
   const [customSell, setCustomSell] = useState("");
+  const [customAgainst, setCustomAgainst] = useState("");
+  const [presetAgainst, setPresetAgainst] = useState("");
   const [countrySearch, setCountrySearch] = useState("");
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const info = state.companyInfo || { values: ["Relationships", "Results", "Reach", "Relevance"], vision: "", mission: "" };
@@ -49,8 +52,9 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
   };
 
   const addPreset = (preset: typeof PRESET_CURRENCIES[0]) => {
+    if (!presetAgainst) { flash("Select against currency first"); return; }
     if (editRates.find(r => r.code === preset.code)) { flash(`${preset.code} already added`); return; }
-    const newRate: CurrencyRate = { ...preset, buy: "", sell: "" };
+    const newRate: CurrencyRate = { ...preset, buy: "", sell: "", against: presetAgainst };
     const next = [...editRates, newRate];
     setEditRates(next);
     onUpdate({ ...state, currencies: next });
@@ -64,8 +68,9 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
   };
 
   const addCustom = () => {
-    if (customCode.length !== 3) { flash("Code must be 3 letters"); return; }
+    if (!customCode) { flash("Code required"); return; }
     if (!customCountry) { flash("Please select a country flag"); return; }
+    if (!customAgainst) { flash("Please select against currency"); return; }
     if (editRates.find(r => r.code === customCode.toUpperCase())) { flash("Already exists"); return; }
     const country = ALL_COUNTRIES.find(c => c.code === customCountry);
     const newRate: CurrencyRate = {
@@ -75,11 +80,12 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
       countryCode: customCountry.toLowerCase(),
       buy: customBuy,
       sell: customSell,
+      against: customAgainst.toUpperCase(),
     };
     const next = [...editRates, newRate];
     setEditRates(next);
     onUpdate({ ...state, currencies: next });
-    setCustomCode(""); setCustomName(""); setCustomCountry(""); setCustomBuy(""); setCustomSell("");
+    setCustomCode(""); setCustomName(""); setCustomCountry(""); setCustomBuy(""); setCustomSell(""); setCustomAgainst("");
     flash("Currency added");
   };
 
@@ -138,9 +144,64 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
         <div style={s.content}>
           {tab === "rates" && (
             <div>
+              <div style={{ marginBottom: "20px" }}>
+                <label style={{ ...s.primaryBtn, cursor: "pointer", display: "block", textAlign: "center", width: "100%", background: "#0132B0" }}>
+                  Upload PDF Rates
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    style={{ display: "none" }}
+                    onClick={(e) => {
+                      (e.target as HTMLInputElement).value = ""; // allow re-upload same file
+                    }}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        flash("Parsing PDF...");
+                        const result = await parseTreasuryPdf(file);
+                        
+                        let added = 0;
+                        let updated = 0;
+                        const next = [...editRates];
+                        
+                        result.forEach(r => {
+                          const existingIndex = next.findIndex(x => x.code === r.code && x.against === r.against);
+                          if (existingIndex >= 0) {
+                            next[existingIndex] = { ...next[existingIndex], buy: r.buy, sell: r.sell };
+                            updated++;
+                          }
+                        });
+                        
+                        setEditRates(next);
+                        // Save immediately for convenience
+                        onUpdate({ ...state, currencies: next });
+                        flash(`Success. Updated ${updated}, Added ${added} rates.`);
+                      } catch (err) {
+                        flash("Failed to parse PDF");
+                        console.error(err);
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+
               {editRates.map((r, i) => (
                 <div key={r.code} style={s.rateRow}>
-                  <span style={s.rateLabel}>{r.flag} {r.code}</span>
+                  <span style={s.rateLabel} title={r.name}>{r.flag} {r.code}</span>
+                  <select
+                    value={r.against || "ZWG"}
+                    onChange={e => {
+                      const next = [...editRates];
+                      next[i] = { ...next[i], against: e.target.value };
+                      setEditRates(next);
+                    }}
+                    style={{ ...s.input, padding: "8px 2px" }}
+                  >
+                    <option value="ZWG">ZWG</option>
+                    <option value="USD">USD</option>
+                    <option value="ZAR">ZAR</option>
+                  </select>
                   <input
                     inputMode="decimal"
                     value={r.buy}
@@ -194,8 +255,14 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
               ))}
 
               <p style={{ ...s.sectionTitle, marginTop: "20px" }}>Add Custom Currency</p>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "8px" }}>
-                <input value={customCode} onChange={e => setCustomCode(e.target.value)} placeholder="Code (3 letters)" style={s.input} maxLength={3} />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "8px" }}>
+                <input value={customCode} onChange={e => setCustomCode(e.target.value)} placeholder="Code" style={s.input} maxLength={8} />
+                <select value={customAgainst} onChange={e => setCustomAgainst(e.target.value)} style={s.input}>
+                  <option value="" disabled>Select vs...</option>
+                  <option value="ZWG">vs ZWG</option>
+                  <option value="USD">vs USD</option>
+                  <option value="ZAR">vs ZAR</option>
+                </select>
                 
                 {/* Country/Flag Picker */}
                 <div style={{ position: "relative" }}>
@@ -271,7 +338,7 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
                   )}
                 </div>
 
-                <input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="Currency Name" style={{ ...s.input, gridColumn: "1/3" }} />
+                <input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="Currency Name" style={{ ...s.input, gridColumn: "1/4" }} />
                 <input 
                   inputMode="decimal"
                   value={customBuy} 
@@ -299,7 +366,15 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
               </div>
               <button onClick={addCustom} style={s.primaryBtn}>ADD CURRENCY</button>
 
-              <p style={{ ...s.sectionTitle, marginTop: "20px" }}>Preset Currencies ({availablePresets.length})</p>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "20px", marginBottom: "10px" }}>
+                <p style={{ ...s.sectionTitle, marginTop: 0, marginBottom: 0 }}>Preset Currencies ({availablePresets.length})</p>
+                <select value={presetAgainst} onChange={e => setPresetAgainst(e.target.value)} style={{ ...s.input, width: "110px", padding: "4px 8px" }}>
+                  <option value="" disabled>vs...</option>
+                  <option value="ZWG">vs ZWG</option>
+                  <option value="USD">vs USD</option>
+                  <option value="ZAR">vs ZAR</option>
+                </select>
+              </div>
               <div style={{ maxHeight: "300px", overflowY: "auto" }}>
                 {availablePresets.map(p => (
                   <div key={p.code} style={s.currRow}>
@@ -472,7 +547,7 @@ const styles: Record<string, React.CSSProperties> = {
     flex: 1, overflowY: "auto", padding: "16px 20px",
   },
   rateRow: {
-    display: "grid", gridTemplateColumns: "80px 1fr 1fr", gap: "8px",
+    display: "grid", gridTemplateColumns: "85px 65px 1fr 1fr", gap: "4px",
     alignItems: "center", marginBottom: "8px",
   },
   rateLabel: {
