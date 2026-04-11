@@ -147,7 +147,22 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
           {tab === "rates" && (
             <div>
               <div style={{ marginBottom: "20px" }}>
-                <label style={{ ...s.primaryBtn, cursor: "pointer", display: "block", textAlign: "center", width: "100%", background: "#0132B0" }}>
+                <label style={{ 
+                  ...s.primaryBtn, 
+                  cursor: "pointer", 
+                  display: "flex", 
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "8px",
+                  width: "100%", 
+                  background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                  boxShadow: "0 4px 15px rgba(16, 185, 129, 0.3)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "8px",
+                  fontWeight: 600,
+                  fontSize: "15px",
+                }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="12" y2="12"></line><line x1="15" y1="15" x2="12" y2="12"></line></svg>
                   Upload PDF Rates
                   <input
                     type="file"
@@ -313,15 +328,6 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
 
           {tab === "branding" && (
             <div>
-              <p style={s.sectionTitle}>Company Name</p>
-              <input
-                value={companyInput}
-                onChange={e => setCompanyInput(e.target.value)}
-                placeholder="Company Name"
-                style={{ ...s.input, width: "100%", marginBottom: "8px" }}
-              />
-              <button onClick={saveCompany} style={{ ...s.primaryBtn, marginBottom: "20px" }}>SAVE COMPANY NAME</button>
-
               <p style={s.sectionTitle}>Our Values (one per line)</p>
               <textarea
                 value={valuesText}

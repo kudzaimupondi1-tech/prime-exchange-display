@@ -112,7 +112,7 @@ const TickerBar = ({ rates, onAdminClick }: Props) => {
             alignItems: "center",
             whiteSpace: "nowrap",
             width: "max-content",
-            animationDuration: `${Math.max(10, rates.length) * 8}s`,
+            animationDuration: `${Math.max(10, rates.length) * 20}s`,
           }}
         >
           {entries.map((r, i) => (

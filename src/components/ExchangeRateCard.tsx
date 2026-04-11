@@ -21,108 +21,121 @@ const ExchangeRateCard = ({ rates }: Props) => {
     }
   });
 
-  const getDisplayRows = (groupRates: CurrencyRate[]) => {
-    return groupRates.slice(0, 5);
+  const getGroupLimit = (group: string) => {
+    if (group === "ZAR") return 2;
+    return 5;
   };
 
-  const maxRows = Math.max(1, ...EXACT_GROUPS.map(g => getDisplayRows(groupedRates[g]).length));
-  const scale = Math.min(3, 5 / maxRows);
+  const getDisplayRows = (group: string, groupRates: CurrencyRate[]) => {
+    return groupRates.slice(0, getGroupLimit(group));
+  };
 
   return (
     <div
       style={{
         height: "100%",
+        width: "100%",
         display: "flex",
         flexDirection: "column",
-        border: "1px solid #008000",
-        borderRadius: "2px",
-        boxShadow: "0px 8px 20px rgba(0,0,0,0.4)",
         overflow: "hidden",
-        background: "#FFFFFF",
+        background: "rgba(255, 255, 255, 0.98)",
+        boxShadow: "0px 8px 30px rgba(0,0,0,0.12)",
+        borderRadius: "10px",
+        border: "1px solid rgba(0,0,0,0.06)",
       }}
     >
       {EXACT_GROUPS.map((group, groupIndex) => (
-        <div key={group} style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
-          {/* RED HEADER */}
+        <div key={group} style={{ 
+          flex: getGroupLimit(group) + 1.5, 
+          display: "flex", 
+          flexDirection: "column", 
+          minHeight: 0,
+          borderTop: groupIndex > 0 ? "2px solid rgba(0,0,0,0.06)" : "none",
+        }}>
+          {/* HEADER */}
           <div
             style={{
-              background: "#e60000",
+              background: "linear-gradient(135deg, #133b7a 0%, #0a2147 100%)",
               color: "#FFFFFF",
               textAlign: "center",
-              padding: "4px 8px",
-              fontFamily: "Montserrat, Arial, sans-serif",
-              fontWeight: 800,
-              fontSize: `clamp(0.8rem, ${1.8 * scale}vh, ${2.5 * scale}rem)`,
-              borderTop: groupIndex > 0 ? "1px solid #008000" : "none",
-              borderBottom: "1px solid #008000",
+              padding: "10px 8px",
+              fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+              fontWeight: 600,
+              letterSpacing: "0.5px",
+              fontSize: "1.3rem",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+              zIndex: 2,
+              position: "relative",
               flex: "0 0 auto",
             }}
           >
-            Exchange Rates Against {group}
+            Exchange Rates against the {group}
           </div>
 
-          {/* BLUE SUB-HEADER */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "35% 1fr 1fr",
-              background: "#0132B0",
-              borderBottom: "1px solid #008000",
-              flex: "0 0 auto",
-            }}
-          >
-            <span
+          {/* SUB-HEADER */}
+          {groupIndex === 0 && (
+            <div
               style={{
-                fontFamily: "Montserrat, Arial, sans-serif",
-                fontWeight: 700,
-                fontSize: `clamp(0.8rem, ${1.5 * scale}vh, ${2.2 * scale}rem)`,
-                color: "#FFFFFF",
-                padding: "6px 12px",
-                textAlign: "center",
-                borderRight: "1px solid #008000",
+                display: "grid",
+                gridTemplateColumns: "33% 1fr 1fr",
+                borderBottom: "1px solid rgba(0,0,0,0.06)",
+                flex: "0 0 auto",
+                background: "#fafafa",
+                zIndex: 1,
               }}
             >
-              Currency
-            </span>
-            <span
-              style={{
-                fontFamily: "Montserrat, Arial, sans-serif",
-                fontWeight: 800,
-                fontSize: `clamp(0.8rem, ${1.5 * scale}vh, ${2.2 * scale}rem)`,
-                color: "#FFFFFF",
-                padding: "6px",
-                textAlign: "center",
-                borderRight: "1px solid #008000",
-              }}
-            >
-              WE BUY
-            </span>
-            <span
-              style={{
-                fontFamily: "Montserrat, Arial, sans-serif",
-                fontWeight: 800,
-                fontSize: `clamp(0.8rem, ${1.5 * scale}vh, ${2.2 * scale}rem)`,
-                color: "#FFFFFF",
-                padding: "6px",
-                textAlign: "center",
-              }}
-            >
-              WE SELL
-            </span>
-          </div>
+              <span
+                style={{
+                  background: "linear-gradient(180deg, #b8e0a1 0%, #a6d388 100%)",
+                  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+                  fontWeight: 700,
+                  fontSize: "1.3rem",
+                  color: "#182b10",
+                  padding: "10px 8px",
+                  textAlign: "center",
+                  borderRight: "1px solid rgba(0,0,0,0.04)",
+                }}
+              >
+                Currency
+              </span>
+              <span
+                style={{
+                  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+                  fontWeight: 700,
+                  fontSize: "1.3rem",
+                  color: "#333333",
+                  padding: "10px 8px",
+                  textAlign: "center",
+                }}
+              >
+                We Buy
+              </span>
+              <span
+                style={{
+                  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+                  fontWeight: 700,
+                  fontSize: "1.3rem",
+                  color: "#c62828",
+                  padding: "10px 8px",
+                  textAlign: "center",
+                }}
+              >
+                We Sell
+              </span>
+            </div>
+          )}
 
           {/* TABLE ROWS */}
           <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-            {getDisplayRows(groupedRates[group]).map((rate) => (
+            {getDisplayRows(group, groupedRates[group]).map((rate) => (
               <div
                 key={rate.code}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "35% 1fr 1fr",
+                  gridTemplateColumns: "33% 1fr 1fr",
                   alignItems: "stretch",
                   flex: "1 1 0",
-                  background: "#FFFFFF",
-                  borderBottom: "1px solid rgba(0, 128, 0, 0.2)",
+                  borderBottom: "1px solid rgba(0,0,0,0.08)",
                   minHeight: 0,
                 }}
               >
@@ -131,17 +144,18 @@ const ExchangeRateCard = ({ rates }: Props) => {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    padding: "0 20px",
-                    background: "#0132B0",
-                    borderRight: "1px solid rgba(0, 128, 0, 0.2)",
-                    gap: "12px",
+                    justifyContent: "flex-start",
+                    paddingLeft: "15%",
+                    background: "rgba(166, 211, 136, 0.8)",
+                    gap: "14px",
+                    borderRight: "1px solid rgba(0,0,0,0.04)",
                   }}
                 >
                   {/* FLAG */}
                   <div
                     style={{
-                      width: `clamp(24px, ${3 * scale}vh, ${40 * scale}px)`,
-                      height: `clamp(24px, ${3 * scale}vh, ${40 * scale}px)`,
+                      width: "28px",
+                      height: "28px",
                       borderRadius: "50%",
                       overflow: "hidden",
                       display: "flex",
@@ -149,6 +163,7 @@ const ExchangeRateCard = ({ rates }: Props) => {
                       justifyContent: "center",
                       flexShrink: 0,
                       background: "#E0E0E0",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
                     }}
                   >
                     <FlagImage countryCode={rate.countryCode} flag={rate.flag} rateCode={rate.code} />
@@ -156,10 +171,10 @@ const ExchangeRateCard = ({ rates }: Props) => {
 
                   <span
                     style={{
-                      fontFamily: "Montserrat, Arial, sans-serif",
-                      fontSize: `clamp(1.1rem, ${2.4 * scale}vh, ${3.2 * scale}rem)`,
+                      fontFamily: '"Arial Rounded MT Bold", Arial, sans-serif',
+                      fontSize: "1.3rem",
                       fontWeight: 700,
-                      color: "#FFFFFF",
+                      color: "#1a1a1a",
                       whiteSpace: "nowrap",
                     }}
                   >
@@ -173,16 +188,16 @@ const ExchangeRateCard = ({ rates }: Props) => {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    borderRight: "1px solid rgba(0, 128, 0, 0.2)",
                   }}
                 >
                   <span
                     style={{
-                      fontFamily: '"Arial Rounded MT Bold", sans-serif',
-                      fontSize: `clamp(1.3rem, ${2.8 * scale}vh, ${3.8 * scale}rem)`,
-                      fontWeight: 800,
-                      color: "#000000",
+                      fontFamily: '"Arial Rounded MT Bold", Arial, sans-serif',
+                      fontSize: "1.4rem",
+                      fontWeight: 700,
+                      color: "#222222",
                       whiteSpace: "nowrap",
+                      letterSpacing: "0.2px",
                     }}
                   >
                     {formatWithSpaces(rate.buy)}
@@ -199,11 +214,12 @@ const ExchangeRateCard = ({ rates }: Props) => {
                 >
                   <span
                     style={{
-                      fontFamily: '"Arial Rounded MT Bold", sans-serif',
-                      fontSize: `clamp(1.3rem, ${2.8 * scale}vh, ${3.8 * scale}rem)`,
-                      fontWeight: 800,
-                      color: "#e60000",
+                      fontFamily: '"Arial Rounded MT Bold", Arial, sans-serif',
+                      fontSize: "1.4rem",
+                      fontWeight: 700,
+                      color: "#c62828",
                       whiteSpace: "nowrap",
+                      letterSpacing: "0.2px",
                     }}
                   >
                     {rate.sell ? formatWithSpaces(rate.sell) : "—"}
@@ -229,7 +245,7 @@ const FlagImage = ({ countryCode, flag, rateCode }: { countryCode: string; flag:
   const actualCode = (rateCode ? codeMap[rateCode.toUpperCase()] : null) || countryCode;
 
   if (error || !actualCode) {
-    return <span style={{ fontSize: "20px", lineHeight: 1 }}>{flag}</span>;
+    return <span style={{ fontSize: "16px", lineHeight: 1 }}>{flag}</span>;
   }
   return (
     <img

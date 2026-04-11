@@ -7,4 +7,13 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error('Supabase URL or Key is missing from environment variables.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  global: {
+    fetch: (...args) => {
+      const [input, init = {}] = args;
+      // Guarantee strictly no caching on supabase network calls globally.
+      init.cache = 'no-store';
+      return fetch(input, init);
+    }
+  }
+});
