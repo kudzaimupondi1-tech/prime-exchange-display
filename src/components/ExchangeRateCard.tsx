@@ -62,7 +62,10 @@ const ExchangeRateCard = ({ rates }: Props) => {
               fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
               fontWeight: 600,
               letterSpacing: "0.5px",
-              fontSize: "1.3rem",
+              fontSize: "clamp(0.9rem, 1.6vw, 2rem)",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
               boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
               zIndex: 2,
               position: "relative",
@@ -88,8 +91,8 @@ const ExchangeRateCard = ({ rates }: Props) => {
                 style={{
                   background: "linear-gradient(180deg, #b8e0a1 0%, #a6d388 100%)",
                   fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
-                  fontWeight: 700,
-                  fontSize: "1.3rem",
+                  fontWeight: 900,
+                  fontSize: "clamp(1.1rem, 2.2vh, 2.6rem)",
                   color: "#182b10",
                   padding: "10px 8px",
                   textAlign: "center",
@@ -101,8 +104,8 @@ const ExchangeRateCard = ({ rates }: Props) => {
               <span
                 style={{
                   fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
-                  fontWeight: 700,
-                  fontSize: "1.3rem",
+                  fontWeight: 900,
+                  fontSize: "clamp(1.1rem, 2.2vh, 2.6rem)",
                   color: "#333333",
                   padding: "10px 8px",
                   textAlign: "center",
@@ -113,8 +116,8 @@ const ExchangeRateCard = ({ rates }: Props) => {
               <span
                 style={{
                   fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
-                  fontWeight: 700,
-                  fontSize: "1.3rem",
+                  fontWeight: 900,
+                  fontSize: "clamp(1.1rem, 2.2vh, 2.6rem)",
                   color: "#c62828",
                   padding: "10px 8px",
                   textAlign: "center",
@@ -154,8 +157,8 @@ const ExchangeRateCard = ({ rates }: Props) => {
                   {/* FLAG */}
                   <div
                     style={{
-                      width: "28px",
-                      height: "28px",
+                      width: "clamp(20px, 3.5vh, 50px)",
+                      height: "clamp(20px, 3.5vh, 50px)",
                       borderRadius: "50%",
                       overflow: "hidden",
                       display: "flex",
@@ -172,8 +175,8 @@ const ExchangeRateCard = ({ rates }: Props) => {
                   <span
                     style={{
                       fontFamily: '"Arial Rounded MT Bold", Arial, sans-serif',
-                      fontSize: "1.3rem",
-                      fontWeight: 700,
+                      fontSize: "clamp(1rem, 2vh, 2.5rem)",
+                      fontWeight: 900,
                       color: "#1a1a1a",
                       whiteSpace: "nowrap",
                     }}
@@ -193,8 +196,8 @@ const ExchangeRateCard = ({ rates }: Props) => {
                   <span
                     style={{
                       fontFamily: '"Arial Rounded MT Bold", Arial, sans-serif',
-                      fontSize: "1.4rem",
-                      fontWeight: 700,
+                      fontSize: "clamp(1.1rem, 2.5vh, 3.2rem)",
+                      fontWeight: 900,
                       color: "#222222",
                       whiteSpace: "nowrap",
                       letterSpacing: "0.2px",
@@ -215,8 +218,8 @@ const ExchangeRateCard = ({ rates }: Props) => {
                   <span
                     style={{
                       fontFamily: '"Arial Rounded MT Bold", Arial, sans-serif',
-                      fontSize: "1.4rem",
-                      fontWeight: 700,
+                      fontSize: "clamp(1.1rem, 2.5vh, 3.2rem)",
+                      fontWeight: 900,
                       color: "#c62828",
                       whiteSpace: "nowrap",
                       letterSpacing: "0.2px",
@@ -245,7 +248,7 @@ const FlagImage = ({ countryCode, flag, rateCode }: { countryCode: string; flag:
   const actualCode = (rateCode ? codeMap[rateCode.toUpperCase()] : null) || countryCode;
 
   if (error || !actualCode) {
-    return <span style={{ fontSize: "16px", lineHeight: 1 }}>{flag}</span>;
+    return <span style={{ fontSize: "clamp(12px, 1.8vh, 32px)", lineHeight: 1 }}>{flag}</span>;
   }
   return (
     <img
