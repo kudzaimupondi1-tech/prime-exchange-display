@@ -32,6 +32,8 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
   const [valuesText, setValuesText] = useState(info.values.join("\n"));
   const [visionText, setVisionText] = useState(info.vision);
   const [missionText, setMissionText] = useState(info.mission);
+  const [showDebug, setShowDebug] = useState(false);
+  const [debugText, setDebugText] = useState("");
 
   const flash = (msg: string) => {
     setFeedback(msg);
@@ -129,6 +131,23 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
         {/* Feedback */}
         {feedback && <div style={s.feedback}>{feedback}</div>}
 
+        {/* PDF Debug overlay */}
+        {showDebug && (
+          <div style={{ position: "absolute", inset: 0, zIndex: 9999, background: "#06101d", display: "flex", flexDirection: "column", padding: "16px", gap: "8px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ color: "#d4af37", fontWeight: 700, fontSize: "13px", fontFamily: "Montserrat, sans-serif" }}>PDF DEBUG — Copy &amp; paste to developer</span>
+              <button onClick={() => setShowDebug(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: "18px", cursor: "pointer" }}>✕</button>
+            </div>
+            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "11px", margin: 0 }}>Select all text below, copy, and send it to the developer so they can fix the parser.</p>
+            <textarea
+              readOnly
+              value={debugText}
+              style={{ flex: 1, background: "#0d1b2a", color: "#a0f0a0", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px", padding: "10px", fontSize: "11px", fontFamily: "monospace", resize: "none" }}
+              onClick={e => (e.target as HTMLTextAreaElement).select()}
+            />
+          </div>
+        )}
+
         {/* Tabs */}
         <div style={s.tabBar}>
           {(["rates", "currencies", "display", "branding", "settings"] as const).map(t => (
@@ -176,26 +195,50 @@ const AdminDrawer = ({ state, onUpdate, onClose }: Props) => {
                       if (!file) return;
                       try {
                         flash("Parsing PDF...");
-                        const result = await parseTreasuryPdf(file);
-                        
+                        const parsed = await parseTreasuryPdf(file);
+                        const result = parsed.extracted;
+
+                        if (result.length === 0) {
+                          // Show debug popup so we can see what text the PDF contains
+                          console.log("=== PDF DEBUG ===");
+                          console.log(parsed.debug);
+                          setDebugText(parsed.debug);
+                          setShowDebug(true);
+                          flash("0 rates found — debug view opened");
+                          return;
+                        }
+
                         let added = 0;
                         let updated = 0;
                         const next = [...editRates];
-                        
+
                         result.forEach(r => {
-                          const existingIndex = next.findIndex(x => x.code === r.code && x.against === r.against);
+                          const existingIndex = next.findIndex(x => x.code === r.code && (x.against || "ZWG") === r.against);
                           if (existingIndex >= 0) {
                             next[existingIndex] = { ...next[existingIndex], buy: r.buy, sell: r.sell };
                             updated++;
+                          } else {
+                            const preset = PRESET_CURRENCIES.find(p => p.code === r.code);
+                            const countryMatches = ALL_COUNTRIES.filter(c => c.code.toUpperCase() === r.code.substring(0, 2) || c.currency === r.code);
+                            const country = countryMatches[0];
+                            next.push({
+                              code: r.code,
+                              against: r.against,
+                              buy: r.buy,
+                              sell: r.sell,
+                              name: preset?.name || r.code,
+                              flag: preset?.flag || country?.flag || "💱",
+                              countryCode: preset?.countryCode || country?.code.toLowerCase() || "xx"
+                            });
+                            added++;
                           }
                         });
-                        
+
                         setEditRates(next);
-                        // Save immediately for convenience
                         onUpdate({ ...state, currencies: next });
-                        flash(`Success. Updated ${updated}, Added ${added} rates.`);
+                        flash(`✅ Updated ${updated}, Added ${added} rates.`);
                       } catch (err) {
-                        flash("Failed to parse PDF");
+                        flash("Failed to parse PDF — check console");
                         console.error(err);
                       }
                     }}
